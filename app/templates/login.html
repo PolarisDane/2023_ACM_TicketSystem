@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}
+Login
+{% endblock %}
+
+{% block body %}
+
+<div class="text-center mt-5 col-3">
+  <input class="col-lg-4" type="text" id="usr_name" required>
+  </br>
+  <input class="col-lg-4" type="password" id="usr_password" required>
+  </br>
+  <button class="col-lg-2">Login</button>
+</div>
+  
+<script>
+  $("button").click(function() {
+    let sendData = {
+      "usr_name": $("#usr_name").val(),
+      "usr_password": $("#usr_password").val()
+    }
+    $.ajax({
+      url: "/login",
+      type: "post",
+      data: sendData,
+      
+      success: function(data) {
+        if (data == "1"){
+          window.location.replace("/user");
+        }
+        else {
+          alert("Login failed");
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}
