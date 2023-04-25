@@ -10,6 +10,7 @@
 #include <fstream>
 #include "list.h"
 #include "hashmap.h"
+#include "vector.h"
 #include "MemPool.h"
 
 const int headSize = 3 * (int)sizeof(int);
@@ -167,8 +168,8 @@ public:
 
 public:
 
-  BPTree(const std::string& file_name) :Cache(this) {
-    index_file.open(file_name + ".index", std::ios::binary | std::ios::out | std::ios::in);
+  BPTree(const std::string& file_name) :Cache(this), Mem(file_name) {
+    index_file.open(file_name + ".db", std::ios::binary | std::ios::out | std::ios::in);
     if (index_file.good()) {
       index_file.seekg(0);
       index_file.read(reinterpret_cast<char*>(&nodeCnt), sizeof(int));
@@ -177,8 +178,8 @@ public:
     }
     else {
       std::fstream create;
-      create.open(file_name + ".index", std::ios::out); create.close();
-      index_file.open(file_name + ".index", std::ios::binary | std::ios::out | std::ios::in);
+      create.open(file_name + ".db", std::ios::out); create.close();
+      index_file.open(file_name + ".db", std::ios::binary | std::ios::out | std::ios::in);
       nodeCnt = -1;
       Node _root(++nodeCnt);
       Cache.insert(root_index = _root.index, _root);
@@ -520,59 +521,65 @@ public:
     if (now.NodeSize < minNodeSize) maintainNode(now.index);
   }
 
-  void find(const Key_Type& _key) {
+  vector<Value_Type> find(const Key_Type& _key) {
     Node now = findNodebyKey(_key);
     int pos = now.LowerBoundKey(_key);
-    bool find_flag = false;
+    vector<Value_Type> vec;
     while (true) {
       for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) {
-          if (!find_flag) std::cout << "null";
-          return;
-        }
-        if (now._array[i].key == _key) {
-          find_flag = true;
-          std::cout << now._array[i].val << " ";
-        }
+        if (now._array[i].key > _key) return vec;
+        if (now._array[i].key == _key) vec.push_back(now._array[i].val);
       }
       pos = 0;
-      if (now.nxt == -1) {
-        if (!find_flag) std::cout << "null";
-        return;
-      }
+      if (now.nxt == -1) return vec;
       Cache.find(now.nxt, now);
     }
   }
 
-  //The rest function are for debug
-
-  void debug(int pos) {
-    Node now; Cache.find(pos, now);
-    std::cout << "Node " << now.index << std::endl;
-    std::cout << "NodeSize " << now.NodeSize << std::endl;
-    std::cout << "Isleaf " << now.is_leaf << std::endl;
-    std::cout << "fa " << now.fa << std::endl;
-    std::cout << "pre " << now.pre << std::endl;
-    std::cout << "nxt " << now.nxt << std::endl;
-    if (now.is_leaf) {
-      std::cout << "Data" << std::endl;
-      for (int i = 0; i < now.NodeSize; i++)
-        std::cout << now._array[i].key << " " << now._array[i].val << std::endl;
-      std::cout << "End" << std::endl;
-    }
-    else {
-      std::cout << "Son Node" << std::endl;
-      for (int i = 0; i < now.NodeSize; i++) {
-        std::cout << now._array[i].key << " " << now._array[i].pos << std::endl;
+  int count(const Key_Type& _key) {
+    Node now = findNodebyKey(_key);
+    int pos = now.LowerBoundKey(_key);
+    int cnt = 0;
+    while (true) {
+      for (int i = pos; i < now.NodeSize; i++) {
+        if (now._array[i].key > _key) return cnt;
+        if (now._array[i].key == _key) cnt++;
       }
-      std::cout << "End" << std::endl;
-    }
-    if (!now.is_leaf) {
-      for (int i = 0; i < now.NodeSize; i++)
-        debug(now._array[i].pos);
+      pos = 0;
+      if (now.nxt == -1) return cnt;
+      Cache.find(now.nxt, now);
     }
   }
 
-};
+    //The rest function are for debug
+
+    void debug(int pos) {
+      Node now; Cache.find(pos, now);
+      std::cout << "Node " << now.index << std::endl;
+      std::cout << "NodeSize " << now.NodeSize << std::endl;
+      std::cout << "Isleaf " << now.is_leaf << std::endl;
+      std::cout << "fa " << now.fa << std::endl;
+      std::cout << "pre " << now.pre << std::endl;
+      std::cout << "nxt " << now.nxt << std::endl;
+      if (now.is_leaf) {
+        std::cout << "Data" << std::endl;
+        for (int i = 0; i < now.NodeSize; i++)
+          std::cout << now._array[i].key << " " << now._array[i].val << std::endl;
+        std::cout << "End" << std::endl;
+      }
+      else {
+        std::cout << "Son Node" << std::endl;
+        for (int i = 0; i < now.NodeSize; i++) {
+          std::cout << now._array[i].key << " " << now._array[i].pos << std::endl;
+        }
+        std::cout << "End" << std::endl;
+      }
+      if (!now.is_leaf) {
+        for (int i = 0; i < now.NodeSize; i++)
+          debug(now._array[i].pos);
+      }
+    }
+
+  };
 
 #endif
