@@ -73,6 +73,12 @@ public:
     return (*this);
   }
 
+  int operator -(const Date& other) {
+    int day1 = day_sum[month - 1] + day;
+    int day2 = day_sum[other.month - 1] + other.day;
+    return day1 - day2;
+  }
+
   friend std::ostream& operator <<(std::ostream& os, const Date& date) {
     if (date.month < 10) os << "0";
     os << date.month << "-";
@@ -159,6 +165,11 @@ public:
       }
     }
     return (*this);
+  }
+
+  int operator -(const Time& other) {
+    int ans = (date - other.date) * 24 * 60;
+    ans += hour * 60 + min - other.hour * 60 - other.min;
   }
 
   friend std::ostream& operator <<(std::ostream& os, const Time& tim) {
