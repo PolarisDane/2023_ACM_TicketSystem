@@ -81,6 +81,17 @@ public:
     delete[] tab;
   }
 
+  void clear() {
+    for (int i = 0; i < capacity; i++) {
+      node* now = tab[i], * tmp;
+      while (now) {
+        tmp = now->nxt;
+        delete now; now = tmp;
+      }
+      tab[i] = nullptr;
+    }
+  }
+
   Value_Type& operator [](const Key_Type& _key) {
     unsigned long long _hashVal = hash(_key);
     size_t index = _hashVal & (capacity - 1);

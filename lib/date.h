@@ -97,7 +97,7 @@ public:
   Time() = default;
   ~Time() = default;
 
-  Time(int _month, int _day, int _hour, int _min) :date(_month, _day), hour(_hour), min(_min) {}
+  Time(int _month = 1, int _day = 1, int _hour, int _min) :date(_month, _day), hour(_hour), min(_min) {}
   Time(const Time& other) :date(other.date), hour(other.hour), min(other.min) {}
 
   bool operator <(const Time& other)const {

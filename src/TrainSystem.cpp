@@ -16,6 +16,20 @@ Train::Train(const trainid& _trainID, const int& _stationNum, const int& _seatNu
   }
 }
 
+Time Train::get_arrive_time(const Date& date, const int& sta_pos) {
+  Time ans(st_time);
+  ans.date = date;
+  ans += arriv_time[sta_pos];
+  return ans;
+}
+
+Time Train::get_leave_time(const Date& date, const int& sta_pos) {
+  Time ans(st_time);
+  ans.date = date;
+  ans += leave_time[sta_pos];
+  return ans;
+}
+
 train_ticket::train_ticket(const int& stationNum, const int& seatNum) {
   for (int i = 1; i < stationNum; i++) remain[i] = seatNum;
   for (int i = 1; i <= block_cnt; i++) {
@@ -195,12 +209,62 @@ int TrainSystem::query_ticket(const station& st_sta, const station& ed_sta, cons
     std::cout << ans[i].trainID << " " << st_sta << " " << ans[i].leave_time << " -> ";
     std::cout << ed_sta << " " << ans[i].arriv_time << " " << ans[i].price << " " << ans[i].remainSeatNum << std::endl;
   }
+
   return 0;
 }
 
 int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, const Date& date, int opt) {
   bool flag = false;
   transfer_ticket ans; station inter_sta;
+  auto res_st = PassData.find(st_sta);
+  auto res_ed = PassData.find(ed_sta);
+  HashMap<station, int, Stringhash> mp;
+  for (int p1 = 0; p1 < res_st.size(); i++) {
+    if (date > res_st[p1].ed_date || date < res_st[p1].st_date) continue;
+    Train train_st;
+    auto res = TrainData.find(res_st[p1].trainID);
+    int curPos = res[0];
+    Train train_st; readTrain(curPos, train_st);
+    mp.clear();
+    for (int i = res_st[p1].pos + 1; i <= train_st.stationNum; i++) mp[train_st.stations[i]] = i;
+    for (int p2 = 0; p2 < res_ed.size(); i++) {
+      if (st.trainID == ed.trainID) continue;
+      res = TrainData.find(res_ed[p2].trainID);
+      curPos = res[0];
+      Train train_ed; readTrain(curPos, train_ed);
+      for (int i = 1; i <= res_ed[p2].pos - 1; i++) {
+        int inter_sta_pos = mp[train_ed.stations[i]];//车站在 train_st 中的位置
+        Time inter_arriv_time = train_st.get_arrive_time(date, inter_sta_pos);
+        inter_arriv_time -= train_ed.leave_time[i];
+        if (inter_arriv_time < train_ed.get_leave_time(train_ed.st_date, 1) || inter_arriv_time > train_ed.get_leave_time(train_ed.ed_date, 1)) continue;
+        if ();
+
+        res = TicketData.find(std::make_pair(train_st.trainID, date - train_st.st_date + 1));
+
+        int rem_seat_st=res
+
+        transfer_ticket nowAns(
+          trip_ticket(train_st.trainID, train_st.leave_time[res_st[p1].pos], train_st.arriv_time[inter_sta_pos],
+            train_st.price[inter_sta_pos] - train_st.price[res_st[p1].pos - 1], rem_seat_st), ,
+          trip_ticket(train_ed.trainID, train_ed.leave_time[], train_ed.arriv_time[res_ed[p2].pos],
+            train_ed.price[res_ed[p2].pos] - train_ed.price[i - 1], rem_seat_ed);
+        );
+
+        if (!flag) {
+          ans = nowAns;
+          flag = true;
+        }
+        else {
+          if (opt == 0) {
+            if (cmpByTime(nowAns, ans)) ans = nowAns;
+          }
+          else if (opt == 1) {
+            if (cmpByCost(nowAns, ans)) ans = nowAns;
+          }
+        }
+      }
+    }
+  }
 
   if (flag) {
     std::cout << ans.first.trainID << " " << st_sta << " " << ans.first.leave_time << " -> ";
@@ -209,6 +273,7 @@ int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, co
     std::cout << ed_sta << " " << ans.second.arriv_time << " " << ans.second.price << " " << ans.second.remainSeatNum << std::endl;
   }
   else std::cout << "0" << std::endl;
+
   return 0;
 }
 

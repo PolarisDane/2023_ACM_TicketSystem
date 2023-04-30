@@ -39,7 +39,11 @@ public:
   ~Train() = default;
 
   Train(const trainid& _trainID, const int& _stationNum, const int& _seatNum, station* _stations, int* _price,
-    const Time& _st_time, int* trav_time, int* stop_time, const Date& _st_date, const Date& _ed_date, const char& _type)£»
+    const Time& _st_time, int* trav_time, int* stop_time, const Date& _st_date, const Date& _ed_date, const char& _type);
+
+  Time get_arrive_time(const Date& date, const int& sta_pos);
+
+  Time get_leave_time(const Date& date, const int& sta_pos);
 
 };
 
@@ -129,13 +133,13 @@ public:
 
   void readTrain(const int& pos, Train& p);
   void writeTrain(const int& pos, Train& p);
-  void add_train(const trainid& newID, const int& newstationNum, const int& newseatNum, station* _stations, int* _price, const Time& new_st_time,
+  int add_train(const trainid& newID, const int& newstationNum, const int& newseatNum, station* _stations, int* _price, const Time& new_st_time,
     int* new_trav_time, int* new_stop_time, const int& newseatNum, const Date& new_st_Date, const Date& new_ed_Date, const char& newType);
-  void delete_train(const trainid& trainID);
-  void release_train(const trainid& trainID);
-  void query_train(const trainid& trainID, const Date& date);
-  void query_ticket(const station& st_sta, const station& ed_sta, const Date& date, int opt);
-  void query_transfer(const station& st_sta, const station& ed_sta, const Date& date, int opt);
+  int delete_train(const trainid& trainID);
+  int release_train(const trainid& trainID);
+  int query_train(const trainid& trainID, const Date& date);
+  int query_ticket(const station& st_sta, const station& ed_sta, const Date& date, int opt);
+  int query_transfer(const station& st_sta, const station& ed_sta, const Date& date, int opt);
 };
 
 #endif
