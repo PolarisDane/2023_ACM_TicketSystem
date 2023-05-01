@@ -10,6 +10,7 @@
 #include "hashmap.h"
 #include "vector.h"
 #include "BPT.h"
+#include "FileSystem.h"
 
 class User {
 public:
@@ -28,11 +29,8 @@ class UserSystem {
 
 public:
   
-  UserSystem();
-  ~UserSystem();
-
-  void readUser(const int& pos, User& p);
-  void writeUser(const int& pos, User& p);
+  UserSystem() :UserData("User") {}
+  ~UserSystem() = default;
 
   int addUser(const username& curUser, const username& newName, const userpassword& newPassword,
     const userrealname& newRealname, const usermail& newMail, const int& newP);
@@ -45,10 +43,7 @@ public:
 
 private:
 
-  std::fstream user_file;
-
-  int user_cnt;
-  BPTree<username, int>UserData;
+  FileSystem<username, User> UserData;
   HashMap<username, bool, Stringhash>UserStat;
 
 };

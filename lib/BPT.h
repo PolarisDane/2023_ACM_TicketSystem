@@ -542,11 +542,11 @@ public:
     int cnt = 0;
     while (true) {
       for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) return cnt;
-        if (now._array[i].key == _key) cnt++;
+        if (now._array[i].key > _key) return 0;
+        if (now._array[i].key == _key) return 1;
       }
       pos = 0;
-      if (now.nxt == -1) return cnt;
+      if (now.nxt == -1) return 0;
       Cache.find(now.nxt, now);
     }
   }

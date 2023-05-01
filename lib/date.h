@@ -73,7 +73,7 @@ public:
     return (*this);
   }
 
-  int operator -(const Date& other) {
+  int operator -(const Date& other)const {
     int day1 = day_sum[month - 1] + day;
     int day2 = day_sum[other.month - 1] + other.day;
     return day1 - day2;
@@ -97,7 +97,7 @@ public:
   Time() = default;
   ~Time() = default;
 
-  Time(int _month = 1, int _day = 1, int _hour, int _min) :date(_month, _day), hour(_hour), min(_min) {}
+  Time(int _hour, int _min, int _month = 1, int _day = 1) :date(_month, _day), hour(_hour), min(_min) {}
   Time(const Time& other) :date(other.date), hour(other.hour), min(other.min) {}
 
   bool operator <(const Time& other)const {
@@ -167,9 +167,10 @@ public:
     return (*this);
   }
 
-  int operator -(const Time& other) {
+  int operator -(const Time& other)const {
     int ans = (date - other.date) * 24 * 60;
     ans += hour * 60 + min - other.hour * 60 - other.min;
+    return ans;
   }
 
   friend std::ostream& operator <<(std::ostream& os, const Time& tim) {
@@ -180,7 +181,7 @@ public:
     os << tim.min;
     return os;
   }
-
+  
 };
 
 #endif

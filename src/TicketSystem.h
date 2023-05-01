@@ -10,17 +10,17 @@
 #include "TrainSystem.h"
 
 class TicketSystem {
-private:
+public:
   UserSystem UserSys;
   TrainSystem TrainSys;
 public:
-  TicketSystem();
-  ~TicketSystem();
+  TicketSystem() = default;
+  ~TicketSystem() = default;
 
-  int buy_ticket(const User& curUser, const trainid& trainID, const Date& date, const int& ticket_num,
-    const station& st_sta, const station& ed_sta, const bool& type);
-  int query_order(const User& curUser);
-  int refund_ticket(const User& curUser, const int& ticket);
+  //int buy_ticket(const User& curUser, const trainid& trainID, const Date& date, const int& ticket_num,
+  //  const station& st_sta, const station& ed_sta, const bool& type);
+  //int query_order(const User& curUser);
+  //int refund_ticket(const User& curUser, const int& ticket);
 };
 
 

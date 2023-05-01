@@ -13,6 +13,7 @@
 #include "date.h"
 #include "UserSystem.h"
 #include "utils.h"
+#include "FileSystem.h"
 
 const int MAX_STATION_NUM = 101;
 
@@ -59,8 +60,8 @@ public:
   ~train_pass() = default;
   train_pass(const train_pass& other) = default;
 
-  train_pass(const trainid& _trainID, const Date& _st_date, const Date& _ed_date, const Time& _arrive_time, const int& _stop_time, const int& _priceSum, const int& _pos)
-    :trainID(_trainID), st_date(_st_date), ed_date(_ed_date), arrive_time(_arrive_time), stop_time(_stop_time), priceSum(_priceSum), pos(_pos) {}
+  train_pass(const trainid& _trainID, const Date& _st_date, const Date& _ed_date, const Time& _arriv_time, const int& _stop_time, const int& _priceSum, const int& _pos)
+    :trainID(_trainID), st_date(_st_date), ed_date(_ed_date), arriv_time(_arriv_time), stop_time(_stop_time), priceSum(_priceSum), pos(_pos) {}
 };
 
 const int block_len = std::sqrt(MAX_STATION_NUM);
@@ -81,7 +82,7 @@ public:
 
   void modify_ticket(const int& st, const int& ed, const int& cnt);
 
-  static int int get_id(int x);
+  static int get_id(int x);
 
 };
 
@@ -119,22 +120,17 @@ class cmpByCost {
 class TrainSystem {
 private:
 
-  BPTree<trainid, int> TrainData;
-  BPTree<std::pair<trainid, int>, train_ticket> TicketData;
-  BPTree<station, train_pass> PassData;
-
-  std::fstream train_file;
-  int train_cnt;
+  FileSystem<trainid, Train> TrainData;
+  FileSystem<std::pair<trainid, int>, train_ticket> TicketData;
+  FileSystem<station, train_pass> PassData;
 
 public:
 
-  TrainSystem() {}
-  ~TrainSystem() {}
+  TrainSystem() :TrainData("Train"), TicketData("Ticket"), PassData("Pass") {}
+  ~TrainSystem() = default;
 
-  void readTrain(const int& pos, Train& p);
-  void writeTrain(const int& pos, Train& p);
   int add_train(const trainid& newID, const int& newstationNum, const int& newseatNum, station* _stations, int* _price, const Time& new_st_time,
-    int* new_trav_time, int* new_stop_time, const int& newseatNum, const Date& new_st_Date, const Date& new_ed_Date, const char& newType);
+    int* new_trav_time, int* new_stop_time, const Date& new_st_Date, const Date& new_ed_Date, const char& newType);
   int delete_train(const trainid& trainID);
   int release_train(const trainid& trainID);
   int query_train(const trainid& trainID, const Date& date);

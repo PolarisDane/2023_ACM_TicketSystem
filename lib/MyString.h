@@ -23,8 +23,16 @@ public:
   String(const char* s) {
     strcpy(str, s);
   }
-  bool empty() {
+  bool empty()const {
     return !strlen(str);
+  }
+  String& operator =(const std::string& s) {
+    strcpy(str, s.c_str());
+    return (*this);
+  }
+  String& operator =(const char* s) {
+    strcpy(str, s);
+    return (*this);
   }
   bool operator <(const String& other)const {
     return strcmp(str, other.str) < 0;

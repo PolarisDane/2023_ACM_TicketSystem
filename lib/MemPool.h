@@ -6,8 +6,6 @@
 #include <fstream>
 #include <cstring>
 #include <string>
-#include "vector.h"
-#include "exceptions.h"
 
 template<class T>
 class MemPool {
@@ -20,6 +18,7 @@ public:
     mem_file.open(file_name + ".mem", std::ios::binary | std::ios::out | std::ios::in);
     if (mem_file.good()) {
       T x;
+      mem_file.seekg(0);
       mem_file.read(reinterpret_cast<char*>(&cnt), sizeof(int));
       for (int i = 0; i < cnt; i++) {
         mem_file.read(reinterpret_cast<char*>(&x), sizeof(T));
@@ -32,10 +31,10 @@ public:
       create.open(file_name + ".mem", std::ios::out);
       create.close();
       mem_file.open(file_name + ".mem", std::ios::binary | std::ios::out | std::ios::in);
-      Mem.clear();
     }
   }
   ~MemPool() {
+    mem_file.seekp(0);
     mem_file.write(reinterpret_cast<char*>(&cnt), sizeof(int));
     for (int i = 0; i < cnt; i++)
       mem_file.write(reinterpret_cast<char*>(&Mem[i]), sizeof(T));
