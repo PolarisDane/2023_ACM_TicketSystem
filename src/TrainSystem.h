@@ -11,7 +11,6 @@
 #include "vector.h"
 #include "BPT.h"
 #include "date.h"
-#include "UserSystem.h"
 #include "utils.h"
 #include "FileSystem.h"
 
@@ -52,16 +51,16 @@ class train_pass {
 public:
   trainid trainID;
   Date st_date, ed_date;
-  Time arriv_time;
-  int stop_time;
+  Time st_time;
+  int arriv_time, leave_time;
   int priceSum;
   int pos;
   train_pass() = default;
   ~train_pass() = default;
   train_pass(const train_pass& other) = default;
 
-  train_pass(const trainid& _trainID, const Date& _st_date, const Date& _ed_date, const Time& _arriv_time, const int& _stop_time, const int& _priceSum, const int& _pos)
-    :trainID(_trainID), st_date(_st_date), ed_date(_ed_date), arriv_time(_arriv_time), stop_time(_stop_time), priceSum(_priceSum), pos(_pos) {}
+  train_pass(const trainid& _trainID, const Date& _st_date, const Date& _ed_date, const Time& _st_time,const int& _arriv_time, const int& _leave_time, const int& _priceSum, const int& _pos)
+    :trainID(_trainID), st_date(_st_date), ed_date(_ed_date), st_time(_st_time), arriv_time(_arriv_time), leave_time(_leave_time), priceSum(_priceSum), pos(_pos) {}
 };
 
 const int block_len = std::sqrt(MAX_STATION_NUM);
@@ -78,11 +77,13 @@ public:
   train_ticket(const int& stationNum, const int& seatNum);
   ~train_ticket() = default;
 
-  void query_ticket(const int& st, const int& ed);
+  int query_ticket(int st, int ed);
 
   void modify_ticket(const int& st, const int& ed, const int& cnt);
 
-  static int get_id(int x);
+  static int get_id(int x) {
+    return (x - 1) / block_len;
+  }
 
 };
 
@@ -111,6 +112,7 @@ public:
 };
 
 class cmpByCost {
+public:
   bool operator ()(const trip_ticket& t1, const trip_ticket& t2)const {
     if (t1.price != t2.price) return t1.price < t2.price;
     else return t1.trainID < t2.trainID;
@@ -118,6 +120,9 @@ class cmpByCost {
 };
 
 class TrainSystem {
+
+  friend class TicketSystem;
+
 private:
 
   FileSystem<trainid, Train> TrainData;
@@ -125,6 +130,8 @@ private:
   FileSystem<station, train_pass> PassData;
 
 public:
+
+  HashMap<trainid, int, Stringhash> mp = HashMap<trainid, int, Stringhash>(3000);
 
   TrainSystem() :TrainData("Train"), TicketData("Ticket"), PassData("Pass") {}
   ~TrainSystem() = default;

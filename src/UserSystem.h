@@ -27,6 +27,8 @@ public:
 
 class UserSystem {
 
+  friend class TicketSystem;
+
 public:
   
   UserSystem() :UserData("User") {}

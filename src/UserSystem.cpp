@@ -22,6 +22,7 @@ int UserSystem::addUser(const username& curUser, const username& newName, const 
   User newUser(newName, newPassword, newRealname, newMail, newP);
   UserData.data.insert(newName, UserData.dataCnt);
   UserData.write(UserData.dataCnt++, newUser);
+  UserStat[newName] = 0;
   return 0;
 }
 
@@ -57,7 +58,7 @@ int UserSystem::queryProfile(const username& curUser, const username& UserName) 
   if (res.empty()) throw(exceptions("Target user doesn't exist"));
   User tar; UserData.read(res[0], tar);
 
-  if (user.privilege<tar.privilege) throw(exceptions("Authority not enough"));
+  if (user.privilege <= tar.privilege && curUser != UserName) throw(exceptions("Authority not enough"));
 
   std::cout << tar.UserName << " " << tar.UserRealName << " " << tar.UserMail << " " << tar.privilege << std::endl;
   return 0;
@@ -75,7 +76,7 @@ int UserSystem::modifyProfile(const username& curUser, const username& UserName,
   if (res.empty()) throw(exceptions("Target user doesn't exist"));
   User tar; UserData.read(res[0], tar);
 
-  if (user.privilege < tar.privilege) throw(exceptions("Authority not enough"));
+  if (user.privilege < tar.privilege && curUser != UserName) throw(exceptions("Authority not enough"));
 
   if (!newPassword.empty()) tar.UserPassword = newPassword;
   if (!newRealname.empty()) tar.UserRealName = newRealname;
@@ -83,6 +84,7 @@ int UserSystem::modifyProfile(const username& curUser, const username& UserName,
   if (newP != -1) tar.privilege = newP;
 
   UserData.write(res[0], tar);
+  std::cout << tar.UserName << " " << tar.UserRealName << " " << tar.UserMail << " " << tar.privilege << std::endl;
   return 0;
 }
 

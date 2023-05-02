@@ -3,17 +3,19 @@
 Train::Train(const trainid& _trainID, const int& _stationNum, const int& _seatNum, station* _stations, int* _price,
   const Time& _st_time, int* trav_time, int* stop_time, const Date& _st_date, const Date& _ed_date, const char& _type)
   :trainID(_trainID), stationNum(_stationNum), seatNum(_seatNum), st_time(_st_time), st_date(_st_date), ed_date(_ed_date), type(_type) {
+  st_time.date = st_date;
   for (int i = 1; i <= stationNum; i++)
     stations[i] = _stations[i];
   price[1] = 0;
   for (int i = 2; i <= stationNum; i++) price[i] = price[i - 1] + _price[i - 1];
-  int tim = 0;
+  int tim = 0; arriv_time[1] = leave_time[1] = 0;
   for (int i = 2; i <= stationNum; i++) {
-    tim += trav_tim[i - 1];
+    tim += trav_time[i - 1];
     arriv_time[i] = tim;
-    tim += stop_tim[i - 1];
+    tim += stop_time[i - 1];
     leave_time[i] = tim;
   }
+  release = false;
 }
 
 Time Train::get_arrive_time(const Date& date, const int& sta_pos) {
@@ -32,19 +34,19 @@ Time Train::get_leave_time(const Date& date, const int& sta_pos) {
 
 train_ticket::train_ticket(const int& stationNum, const int& seatNum) {
   for (int i = 1; i < stationNum; i++) remain[i] = seatNum;
-  for (int i = 1; i <= block_cnt; i++) {
-    block[i] = seatNum;
+  for (int i = 0; i < block_cnt; i++) {
+    block[i] = (stationNum - 1) > (i - 1) * block_cnt ? seatNum : 0;
     tag[i] = 0;
   }
 }
 
-static int train_ticket::get_id(int x) {
-  return (x - 1) / block_len;
-}
-
-int train_ticket::query_ticket(const int& st, const int& ed) {
-  int ans = 2e9;
+int train_ticket::query_ticket(int st, int ed) {
+  int ans = 2e9; ed--;
   int id1 = get_id(st), id2 = get_id(ed);
+  if (id1 == id2) {
+    for (int i = st; i <= ed; i++) ans = std::min(ans, remain[i] + tag[id1]);
+    return ans;
+  }
   for (int i = id1 + 1; i <= id2 - 1; i++)
     ans = std::min(ans, block[i]);
   for (int i = st; i <= id1 * block_len; i++)
@@ -69,14 +71,14 @@ int TrainSystem::add_train(const trainid& newID, const int& newstationNum, const
   int* new_trav_time, int* new_stop_time, const Date& new_st_Date, const Date& new_ed_Date, const char& newType) {
   if (TrainData.data.count(newID)) throw(exceptions("Identical train ID"));
 
-  Train newTrain(newType, newID, newstationNum, newseatNum, _stations, _price, new_st_time,
-    new_trav_time, new_stop_time, newseatNum, new_st_Date, new_ed_Date);
+  Train newTrain(newID, newstationNum, newseatNum, _stations, _price, new_st_time,
+    new_trav_time, new_stop_time, new_st_Date, new_ed_Date, newType);
 
   TrainData.data.insert(newID, TrainData.dataCnt);
-  TrainData.write(TrainData.datacCnt++, newTrain);
+  TrainData.write(TrainData.dataCnt++, newTrain);
 
   train_ticket ticket(newstationNum, newseatNum);
-  for (int i = 1; i <= new_ed_Date - new_st_Date + 1; i++) {
+  for (int i = 0; i <= new_ed_Date - new_st_Date; i++) {
     TicketData.data.insert(std::make_pair(newID, i), TicketData.dataCnt);
     TicketData.write(TicketData.dataCnt++, ticket);
   }
@@ -106,9 +108,10 @@ int TrainSystem::release_train(const trainid& trainID) {
   train.release = true;
   TrainData.write(res[0], train);
 
-  for (int i = 1; i <= train.stationNum - 1; i++) {
+  for (int i = 1; i <= train.stationNum; i++) {
+    train_pass pass(train.trainID, train.st_date, train.ed_date, train.st_time, train.arriv_time[i], train.leave_time[i], train.price[i], i);
     PassData.data.insert(train.stations[i], PassData.dataCnt);
-    PassData.write(PassData.dataCnt++, train_pass(train.trainID, train.st_date, train.ed_date, train.arriv_time[i], train.st_time[i - 1], train.price[i + 1], i + 1));
+    PassData.write(PassData.dataCnt++, pass);
   }
 
   return 0;
@@ -121,15 +124,23 @@ int TrainSystem::query_train(const trainid& trainID, const Date& date) {
 
   if (date<train.st_date || date>train.ed_date) throw(exceptions("Train not found"));
 
-  int days = date - train.st_date + 1;
+  int days = date - train.st_date;
 
   std::cout << train.trainID << " " << train.type << std::endl;
   for (int i = 1; i <= train.stationNum; i++) {
-    std::cout << train.stations[i] << " " << train.arriv_time[i] << " -> " << train.leave_time << " ";
+    std::cout << train.stations[i] << " ";
+    if (i == 1) std::cout << "xx-xx xx:xx";
+    else std::cout << train.st_time + days * 1440 + train.arriv_time[i];
+    std::cout << " -> ";
+    if (i == train.stationNum) std::cout << "xx-xx xx:xx ";
+    else std::cout << train.st_time + days * 1440 + train.leave_time[i] << " ";
     std::cout << train.price[i] << " ";
-    auto res = TicketData.find(std::make_pair(train.trainID, days));
-    train_ticket ret; TicketData.read(res[0], ret);
-    std::cout << ret.remain[i] + ret.tag[res[0].get_id(i)] << std::endl;
+    if (i == train.stationNum) std::cout << "x";
+    else {
+      auto res = TicketData.data.find(std::make_pair(train.trainID, days));
+      train_ticket ret; TicketData.read(res[0], ret);
+      std::cout << ret.remain[i] + ret.tag[train_ticket::get_id(i)] << std::endl;
+    }
   }
 
   return 0;
@@ -138,41 +149,57 @@ int TrainSystem::query_train(const trainid& trainID, const Date& date) {
 int TrainSystem::query_ticket(const station& st_sta, const station& ed_sta, const Date& date, int opt) {
   vector<trip_ticket> ans;
 
-  auto res = PassData.data.find(st_sta);
-  vector<train_pass> res_st, res_ed;
-  train_pass tmp;
+  auto res1 = PassData.data.find(st_sta);
+  auto res2 = PassData.data.find(ed_sta);
+  vector<train_pass> res_st;
+  train_pass tmp; mp.clear();
   for (int i = 0; i < res1.size(); i++) {
-    PassData.read(res[i], tmp);
+    PassData.read(res1[i], tmp);
     res_st.push_back(tmp);
+    mp[tmp.trainID] = i;
   }
-  res = PassData.data.find(ed_sta);
-  for (int i = 0; i < res1.size(); i++) {
-    PassData.read(res[i], tmp);
-    res_ed.push_back(tmp);
-  }
+  for (int i = 0; i < res2.size(); i++) {
+    PassData.read(res2[i], tmp);
+    if (mp.find(tmp.trainID)) {
+      int p1 = mp[tmp.trainID];
+      int days = date - (res_st[p1].st_time + res_st[p1].leave_time).date;
+      if (days < 0) continue;
 
-  int p1 = 0, p2 = 0;
-  for (; p1 < res_st.size(); p1++) {
-    while (p2 < res_ed.size() && res_st[p1].trainID > res_ed[p2].trainID) {
-      p2++;
-      if (res_st[p1].trainID == res_ed[p2].trainID) {
-        if (res_st[p1].pos < res_ed[p2].pos) {
-          auto trainID = res_st[p1].trainID;
-          int st = res_st[p1].pos, ed = res_ed[p2].pos;
-          if (date > res_st[p1].ed_date || date < res_st[p1].st_date) continue;
-          auto ret = TicketData.find(std::make_pair(trainID, date - res_st[p1].st_date + 1));
-          train_ticket ticket = ret[0];
-          trip_ticket trip(train.trainID, train.st_time + train.leave_time[st],
-            train.st_time + train.arriv_time[ed], train.price[ed] - train.price[st - 1], ticket.query_ticket(st, ed));
-          ans.push_back(trip);
-        }
-      }
+      auto ret = TicketData.data.find(std::make_pair(tmp.trainID, days));
+      train_ticket ticket; TicketData.read(ret[0], ticket);
+      trip_ticket trip(tmp.trainID, res_st[p1].st_time + days * 1440 + res_st[p1].leave_time,
+        res_st[p1].st_time + days * 1440 + tmp.arriv_time, tmp.priceSum - res_st[p1].priceSum, ticket.query_ticket(res_st[p1].pos, tmp.pos));
+      ans.push_back(trip);
     }
   }
+  //int p1 = 0, p2 = 0;
+  //for (; p1 < res1.size(); p1++) {
+  //  while (p2 < res2.size() && res1[p1] >= res2[p2]) {
+  //    std::cout << "pos:" << res1[p1] << " " << res2[p2] << std::endl;
+  //    if (res_st[p1].trainID == res_ed[p2].trainID) {
+  //      if (res_st[p1].pos < res_ed[p2].pos) {
+
+  //        int days = date - res_st[p1].st_date;
+  //        trainid trainID = res_st[p1].trainID;
+
+  //        if (date > res_st[p1].ed_date || date < res_st[p1].st_date) continue;
+  //        int st = res_st[p1].pos, ed = res_ed[p2].pos;
+
+  //        auto ret = TicketData.data.find(std::make_pair(trainID, days));
+  //        train_ticket ticket; TicketData.read(ret[0], ticket);
+
+  //        trip_ticket trip(trainID, res_st[p1].st_time + days * 1440 + res_st[p1].leave_time,
+  //          res_st[p1].st_time + days * 1440 + res_ed[p2].arriv_time, res_ed[p2].priceSum - res_st[p1].priceSum, ticket.query_ticket(st, ed));
+  //        ans.push_back(trip);
+  //      }
+  //    }
+  //    p2++;
+  //  }
+  //}
   if (opt == 0) sort<trip_ticket, cmpByTime>(ans, 0, ans.size());
   else if (opt == 1) sort<trip_ticket, cmpByCost>(ans, 0, ans.size());
 
-  std::cout << abs.size() << std::endl;
+  std::cout << ans.size() << std::endl;
   for (int i = 0; i < ans.size(); i++) {
     std::cout << ans[i].trainID << " " << st_sta << " " << ans[i].leave_time << " -> ";
     std::cout << ed_sta << " " << ans[i].arriv_time << " " << ans[i].price << " " << ans[i].remainSeatNum << std::endl;

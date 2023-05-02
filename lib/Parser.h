@@ -6,7 +6,9 @@
 #include <cstring>
 #include <string>
 #include <cmath>
+#include "TrainSystem.h"
 #include "MyString.h"
+#include "date.h"
 #include "vector.h"
 
 void ReadLine(const std::string& str,std::string* buf) {
@@ -17,34 +19,45 @@ void ReadLine(const std::string& str,std::string* buf) {
       pos = i + 1;
     }
   }
-  if (pos <= str.length() - 1) {
-    buf[++cnt] = str.substr(pos, str.length() - pos + 1);
-  }
+  buf[++cnt] = str.substr(pos);
   buf[0] = std::to_string(cnt);
 }
 
-void parse_station() {
-
+void parse_station(station* stations,const std::string& str) {
+  int pos = 0, cnt = 0;
+  for (int i = 0; i < str.length(); i++) {
+    if (str[i] == '|') {
+      stations[++cnt] = str.substr(pos, i - pos);
+      pos = i + 1;
+    }
+  }
+  stations[++cnt] = str.substr(pos);
 }
 
-void parse_price() {
-
+void parse_num(int* _array,const std::string& str) {
+  int val = 0, cnt = 0;
+  for (int i = 0; i < str.length(); i++) {
+    if (str[i] == '|') {
+      _array[++cnt] = val; val = 0;
+    }
+    else val = val * 10 + str[i] - '0';
+  }
+  _array[++cnt] = val;
 }
 
-void parse_time_point() {
-
+void parse_time_point(Time& tim, const std::string& str) {
+  tim.hour = (str[0] - '0') * 10 + (str[1] - '0');
+  tim.min = (str[3] - '0') * 10 + (str[4] - '0');
 }
 
-void parse_time() {
-
+void parse_date(Date& date, const std::string& str) {
+  date.month = (str[0] - '0') * 10 + (str[1] - '0');
+  date.day = (str[3] - '0') * 10 + (str[4] - '0');
 }
 
-void parse_date() {
-
-}
-
-void parse_st_ed_date() {
-
+void parse_st_ed_date(Date& new_st_Date, Date& new_ed_Date, const std::string& str) {
+  parse_date(new_st_Date, str);
+  parse_date(new_ed_Date, str.substr(6));
 }
 
 #endif

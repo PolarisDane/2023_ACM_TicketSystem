@@ -37,7 +37,7 @@ public:
     return (*this) > other || (*this) == other;
   }
 
-  Date operator +(int days) {
+  Date operator +(int days)const {
     Date tmp((*this)); tmp.day += days;
     while (tmp.day > day_count[tmp.month]) {
       tmp.day -= day_count[tmp.month];
@@ -46,7 +46,7 @@ public:
     return tmp;
   }
 
-  Date operator -(int days) {
+  Date operator -(int days)const {
     Date tmp((*this)); tmp.day -= days;
     while (tmp.day <= 0) {
       tmp.month--;
@@ -123,7 +123,7 @@ public:
     return (*this) > other || (*this) == other;
   }
 
-  Time operator +(int mins) {
+  Time operator +(int mins)const {
     Time tmp((*this)); tmp.min += mins;
     if (tmp.min >= 60) {
       tmp.hour += tmp.min / 60; tmp.min %= 60;
@@ -134,7 +134,7 @@ public:
     return tmp;
   }
 
-  Time operator -(int mins) {
+  Time operator -(int mins)const {
     Time tmp((*this)); tmp.min -= mins;
     if (tmp.min <= 0) {
       tmp.hour -= (-tmp.min + 59) / 60; tmp.min = (60 + tmp.min % 60);
