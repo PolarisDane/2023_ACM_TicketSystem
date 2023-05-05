@@ -75,7 +75,7 @@ public:
     }
     now = new node; now->key = _key; now->nxt = tab[index];
     tab[index] = now;
-    return now->val;
+    return now->val = Value_Type();
   }
 
   void erase(const Key_Type& _key) {

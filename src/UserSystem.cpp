@@ -6,7 +6,6 @@ int UserSystem::addUser(const username& curUser, const username& newName, const 
     User newUser(newName, newPassword, newRealname, newMail, 10);
     UserData.data.insert(newName, UserData.dataCnt);
     UserData.write(UserData.dataCnt++, newUser);
-    UserStat[newName] = 0;
     return 0;
   }
 
@@ -17,12 +16,11 @@ int UserSystem::addUser(const username& curUser, const username& newName, const 
   User user; UserData.read(res[0], user);
 
   if (UserData.data.count(newName)) throw(exceptions("Identical username"));
-  if (user.privilege < newP) throw(exceptions("Authority not enough"));
+  if (user.privilege <= newP) throw(exceptions("Authority not enough"));
 
   User newUser(newName, newPassword, newRealname, newMail, newP);
   UserData.data.insert(newName, UserData.dataCnt);
   UserData.write(UserData.dataCnt++, newUser);
-  UserStat[newName] = 0;
   return 0;
 }
 
@@ -41,14 +39,13 @@ int UserSystem::loginUser(const username& UserName, const userpassword& UserPass
 }
 
 int UserSystem::logoutUser(const username& UserName) {
-  if (!UserStat.find(UserName)) throw(exceptions("Not loginned"));
+  if (!UserStat[UserName]) throw(exceptions("Not loginned"));
   UserStat[UserName] = false;
   return 0;
 }
 
 int UserSystem::queryProfile(const username& curUser, const username& UserName) {
   if (!UserStat[curUser]) throw(exceptions("Not loginned"));
-  if (!UserData.data.count(UserName)) throw(exceptions("User doesn't exist"));
 
   auto res = UserData.data.find(curUser);
   if (res.empty()) throw(exceptions("User doesn't exist"));
@@ -76,7 +73,8 @@ int UserSystem::modifyProfile(const username& curUser, const username& UserName,
   if (res.empty()) throw(exceptions("Target user doesn't exist"));
   User tar; UserData.read(res[0], tar);
 
-  if (user.privilege < tar.privilege && curUser != UserName) throw(exceptions("Authority not enough"));
+  if (user.privilege <= tar.privilege && curUser != UserName) throw(exceptions("Authority not enough"));
+  if (user.privilege <= newP) throw(exceptions("Authority not enough"));
 
   if (!newPassword.empty()) tar.UserPassword = newPassword;
   if (!newRealname.empty()) tar.UserRealName = newRealname;

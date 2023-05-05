@@ -551,6 +551,20 @@ public:
     }
   }
 
+  iterator lower_bound(const Key_Type& _key) {
+    Node now = findNodebyKey(_key);
+    int pos = now.LowerBoundKey(_key);
+    int cnt = 0;
+    while (true) {
+      for (int i = pos; i < now.NodeSize; i++) {
+        if (now._array[i].key >= _key) return iterator(this, now, i);
+      }
+      pos = 0;
+      if (now.nxt == -1) return end();
+      Cache.find(now.nxt, now);
+    }
+  }
+
     //The rest function are for debug
 
     void debug(int pos) {

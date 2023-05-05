@@ -12,11 +12,16 @@ signed main(void) {
   std::string command;
   std::string buf[30];
   int cnt;
+  std::ios::sync_with_stdio(false);
   while (1) {
     std::getline(std::cin, command);
+    buf[2].clear();
     ReadLine(command, buf);
     opt = buf[2];
     cnt = std::stoi(buf[0]);
+    //std::cerr << "cnt:" << cnt << std::endl;
+    //for (int i = 1; i <= cnt; i++) std::cerr << "buf" << i << ":" << buf[i] << " ";
+    //std::cerr << std::endl;
     std::cout << buf[1] << " ";
     try {
       if (opt == "add_user") {
@@ -153,7 +158,7 @@ signed main(void) {
       else if (opt == "query_transfer") {
         station st_sta, ed_sta;
         Date date;
-        int opt;
+        int opt = 0;//默认为按照 time 排序
         for (int i = 3; i <= cnt; i += 2) {
           if (buf[i] == "-s") st_sta = buf[i + 1];
           else if (buf[i] == "-t") ed_sta = buf[i + 1];
@@ -167,13 +172,45 @@ signed main(void) {
         sys.TrainSys.query_transfer(st_sta, ed_sta, date, opt);
       }
       else if (opt == "buy_ticket") {
-
+        username UserName;
+        trainid trainID;
+        Date date;
+        int ticketNum;
+        station st_sta, ed_sta;
+        int opt = 0;//默认不要候补票
+        for (int i = 3; i <= cnt; i += 2) {
+          if (buf[i] == "-u") UserName = buf[i + 1];
+          else if (buf[i] == "-i") trainID = buf[i + 1];
+          else if (buf[i] == "-d") parse_date(date, buf[i + 1]);
+          else if (buf[i] == "-n") ticketNum = std::stoi(buf[i + 1]);
+          else if (buf[i] == "-f") st_sta = buf[i + 1];
+          else if (buf[i] == "-t")ed_sta = buf[i + 1];
+          else if (buf[i] == "-q") {
+            if (buf[i + 1] == "false") opt = 0;
+            else if (buf[i + 1] == "true") opt = 1;
+          }
+          else throw(exceptions("Invalid argument"));
+        }
+        sys.buy_ticket(UserName, trainID, date, ticketNum, st_sta, ed_sta, opt);
       }
       else if (opt == "query_order") {
-
+        username UserName;
+        for (int i = 3; i <= cnt; i += 2) {
+          if (buf[i] == "-u") UserName = buf[i + 1];
+          else throw(exceptions("Invalid argument"));
+        }
+        sys.query_order(UserName);
       }
       else if (opt == "refund_ticket") {
-
+        username UserName;
+        int pos = 1;
+        for (int i = 3; i <= cnt; i += 2) {
+          if (buf[i] == "-u") UserName = buf[i + 1];
+          else if (buf[i] == "-n") pos = std::stoi(buf[i + 1]);
+          else throw(exceptions("Invalid argument"));
+        }
+        sys.refund_ticket(UserName, pos);
+        std::cout << "0" << std::endl;
       }
       else if (opt == "clean") {
         //Not finished
@@ -186,7 +223,7 @@ signed main(void) {
     }
     catch (exceptions& e) {
       std::cout << "-1" << std::endl;
-      std::cout << e.error() << std::endl;
+      //std::cout << e.error() << std::endl;
     }
   }
   return 0;

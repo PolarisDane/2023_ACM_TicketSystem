@@ -63,15 +63,16 @@ public:
     :trainID(_trainID), st_date(_st_date), ed_date(_ed_date), st_time(_st_time), arriv_time(_arriv_time), leave_time(_leave_time), priceSum(_priceSum), pos(_pos) {}
 };
 
-const int block_len = std::sqrt(MAX_STATION_NUM);
+const int block_len = std::sqrt(MAX_STATION_NUM);//10
 
-const int block_cnt = MAX_STATION_NUM / block_len + 1;
+const int block_cnt = MAX_STATION_NUM / block_len + 1;//11
 
 class train_ticket {
 public:
+  int stationCnt;
   int remain[MAX_STATION_NUM];
-  int tag[block_cnt];
-  int block[block_cnt];
+  int tag[block_cnt + 1];
+  int block[block_cnt + 1];
 
   train_ticket() = default;
   train_ticket(const int& stationNum, const int& seatNum);
@@ -79,10 +80,10 @@ public:
 
   int query_ticket(int st, int ed);
 
-  void modify_ticket(const int& st, const int& ed, const int& cnt);
+  void modify_ticket(int st, int ed, const int& cnt);
 
   static int get_id(int x) {
-    return (x - 1) / block_len;
+    return (x - 1) / block_len + 1;
   }
 
 };
@@ -107,7 +108,17 @@ public:
     int tim1 = t1.arriv_time - t1.leave_time;
     int tim2 = t2.arriv_time - t2.leave_time;
     if (tim1 != tim2) return tim1 < tim2;
-    else return t1.trainID < t2.trainID;
+    else return t1.trainID <= t2.trainID;
+  }
+  bool operator ()(const transfer_ticket& t1, const transfer_ticket& t2)const {
+    int tim1 = t1.second.arriv_time - t1.first.leave_time;
+    int tim2 = t2.second.arriv_time - t2.first.leave_time;
+    int price1 = t1.first.price + t1.second.price;
+    int price2 = t2.first.price + t2.second.price;
+    if (tim1 != tim2) return tim1 < tim2;
+    else if (price1 != price2) return price1 < price2;
+    else if (t1.first.trainID != t2.first.trainID) return t1.first.trainID < t2.first.trainID;
+    else return t1.second.trainID <= t2.second.trainID;
   }
 };
 
@@ -115,7 +126,17 @@ class cmpByCost {
 public:
   bool operator ()(const trip_ticket& t1, const trip_ticket& t2)const {
     if (t1.price != t2.price) return t1.price < t2.price;
-    else return t1.trainID < t2.trainID;
+    else return t1.trainID <= t2.trainID;
+  }
+  bool operator ()(const transfer_ticket& t1, const transfer_ticket& t2)const {
+    int tim1 = t1.second.arriv_time - t1.first.leave_time;
+    int tim2 = t2.second.arriv_time - t2.first.leave_time;
+    int price1 = t1.first.price + t1.second.price;
+    int price2 = t2.first.price + t2.second.price;
+    if (price1 != price2) return price1 < price2;
+    else if (tim1 != tim2) return tim1 < tim2;
+    else if (t1.first.trainID != t2.first.trainID) return t1.first.trainID < t2.first.trainID;
+    else return t1.second.trainID <= t2.second.trainID;
   }
 };
 
