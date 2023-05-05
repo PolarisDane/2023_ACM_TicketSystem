@@ -10,6 +10,9 @@ int TicketSystem::buy_ticket(const username& UserName, const trainid& trainID, c
 
   if (!train.release) throw(exceptions("Train not released"));
 
+  if (ticketNum > train.seatNum) throw(exceptions("Expected tickets exceeds total tickets"));
+  //超过总数则不用再进行任何处理
+
   int st = 0, ed = 0;
   for (int i = 1; i <= train.stationNum; i++) {
     if (train.stations[i] == st_sta) st = i;
@@ -19,6 +22,7 @@ int TicketSystem::buy_ticket(const username& UserName, const trainid& trainID, c
 
   int days = date - (train.st_time + train.leave_time[st]).date;
   if (days > train.ed_date - train.st_date || days < 0) throw(exceptions("Train doesn't exist"));
+
   res = TrainSys.TicketData.data.find(std::make_pair(trainID, days));
   train_ticket ticket; TrainSys.TicketData.read(res[0], ticket);
 
@@ -84,24 +88,27 @@ int TicketSystem::refund_ticket(const username& UserName, const int& pos) {
   userTicket.status = -1;
   UserTicketData.write(res[res.size() - pos], userTicket);
 
-  res = TrainSys.TicketData.data.find(std::make_pair(userTicket.trainID, userTicket.days));
-  int ticketPos = res[0];
-  train_ticket ticket; TrainSys.TicketData.read(ticketPos, ticket);
-  if (status) ticket.modify_ticket(userTicket.st, userTicket.ed, userTicket.ticketNum);
+  if (status) {
+    res = TrainSys.TicketData.data.find(std::make_pair(userTicket.trainID, userTicket.days));
+    int ticketPos = res[0];
+    train_ticket ticket; TrainSys.TicketData.read(ticketPos, ticket);
+    ticket.modify_ticket(userTicket.st, userTicket.ed, userTicket.ticketNum);
 
-  res = PendData.data.find(std::make_pair(userTicket.trainID, userTicket.days));
-  for (int i = 0; i < res.size(); i++) {
-    pend_ticket pend; PendData.read(res[i], pend);
-    if (pend.ticketNum <= ticket.query_ticket(pend.st, pend.ed)) {
-      ticket.modify_ticket(pend.st, pend.ed, -pend.ticketNum);
-      UserTicketData.read(pend.user_ticket_pos, userTicket);
-      userTicket.status = 1;
-      UserTicketData.write(pend.user_ticket_pos, userTicket);
-      PendData.data.del(std::make_pair(userTicket.trainID, userTicket.days), res[i]);
+    res = PendData.data.find(std::make_pair(userTicket.trainID, userTicket.days));
+    for (int i = 0; i < res.size(); i++) {
+      pend_ticket pend; PendData.read(res[i], pend);
+      if (pend.ticketNum <= ticket.query_ticket(pend.st, pend.ed)) {
+        UserTicketData.read(pend.user_ticket_pos, userTicket);
+        PendData.data.del(std::make_pair(userTicket.trainID, userTicket.days), res[i]);
+        if (userTicket.status == -1) continue;//可能已经被退款了
+        userTicket.status = 1;
+        UserTicketData.write(pend.user_ticket_pos, userTicket);
+        ticket.modify_ticket(pend.st, pend.ed, -pend.ticketNum);
+      }
     }
+
+    TrainSys.TicketData.write(ticketPos, ticket);
   }
-  
-  TrainSys.TicketData.write(ticketPos, ticket);
 
   return 0;
 }
