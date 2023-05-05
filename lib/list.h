@@ -108,6 +108,16 @@ public:
     it.pointer = nullptr;
   }
 
+  void clear() {
+    node* it = head, * tmp;
+    it = it->nxt;
+    while (it != tail) {
+      tmp = it->nxt;
+      delete it; it = tmp;
+    }
+    head->nxt = tail; tail->pre = head;
+  }
+
 };
 
 #endif

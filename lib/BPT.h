@@ -150,6 +150,11 @@ public:
       map[_key] = ls.insert(std::make_pair(_key, _node));
     }
 
+    void clear() {
+      map.clear();
+
+    }
+
   };
 
   //read 和 write 由 LRU 接管
@@ -563,6 +568,14 @@ public:
       if (now.nxt == -1) return end();
       Cache.find(now.nxt, now);
     }
+  }
+
+  void clear() {
+    Mem.clear();
+    nodeCnt = -1;
+    Node _root(++nodeCnt);
+    Cache.insert(root_index = _root.index, _root);
+    siz = 0;
   }
 
     //The rest function are for debug

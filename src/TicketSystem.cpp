@@ -112,3 +112,14 @@ int TicketSystem::refund_ticket(const username& UserName, const int& pos) {
 
   return 0;
 }
+
+int TicketSystem::clear() {
+  UserTicketData.clear();
+  PendData.clear();
+  UserSys.UserData.clear();
+  UserSys.UserStat.clear();
+  TrainSys.PassData.clear();
+  TrainSys.TicketData.clear();
+  TrainSys.TrainData.clear();
+  return 0;
+}

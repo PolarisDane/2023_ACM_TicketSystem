@@ -213,7 +213,8 @@ signed main(void) {
         std::cout << "0" << std::endl;
       }
       else if (opt == "clean") {
-        //Not finished
+        sys.clear();
+        std::cout << "0" << std::endl;
       }
       else if (opt == "exit") {
         std::cout << "bye" << std::endl;

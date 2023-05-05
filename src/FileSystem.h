@@ -43,6 +43,10 @@ public:
     file.seekp(pos * sizeof(val_type) + sizeof(int));
     file.write(reinterpret_cast<char*>(&val), sizeof(val_type));
   }
+  void clear() {
+    data.clear();
+    dataCnt = 0;
+  }
 };
 
 #endif
