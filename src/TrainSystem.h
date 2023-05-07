@@ -41,10 +41,6 @@ public:
   Train(const trainid& _trainID, const int& _stationNum, const int& _seatNum, station* _stations, int* _price,
     const Time& _st_time, int* trav_time, int* stop_time, const Date& _st_date, const Date& _ed_date, const char& _type);
 
-  Time get_arrive_time(const Date& date, const int& sta_pos);
-
-  Time get_leave_time(const Date& date, const int& sta_pos);
-
 };
 
 class train_pass {
@@ -146,13 +142,13 @@ class TrainSystem {
 
 private:
 
-  FileSystem<trainid, Train> TrainData;
-  FileSystem<std::pair<trainid, int>, train_ticket> TicketData;
-  FileSystem<station, train_pass> PassData;
+  FileSystem<size_t, Train> TrainData;
+  FileSystem<std::pair<size_t, int>, train_ticket> TicketData;
+  FileSystem<std::pair<size_t, size_t>, train_pass> PassData;
 
 public:
 
-  HashMap<trainid, int, Stringhash> mp = HashMap<trainid, int, Stringhash>(3000);
+  //HashMap<trainid, int, Stringhash> mp = HashMap<trainid, int, Stringhash>(500);//¸Ä³ÉË«Ö¸Õë
 
   TrainSystem() :TrainData("Train"), TicketData("Ticket"), PassData("Pass") {}
   ~TrainSystem() = default;

@@ -55,8 +55,8 @@ class TicketSystem {
 public:
   UserSystem UserSys;
   TrainSystem TrainSys;
-  FileSystem<username, user_ticket> UserTicketData;
-  FileSystem<std::pair<trainid, int>, pend_ticket> PendData;
+  FileSystem<size_t, user_ticket> UserTicketData;
+  FileSystem<std::pair<size_t, int>, pend_ticket> PendData;
 public:
   TicketSystem() :UserTicketData("UserTicket"), PendData("Pend") {}
   ~TicketSystem() = default;

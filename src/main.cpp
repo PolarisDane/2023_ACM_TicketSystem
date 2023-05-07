@@ -19,9 +19,6 @@ signed main(void) {
     ReadLine(command, buf);
     opt = buf[2];
     cnt = std::stoi(buf[0]);
-    //std::cerr << "cnt:" << cnt << std::endl;
-    //for (int i = 1; i <= cnt; i++) std::cerr << "buf" << i << ":" << buf[i] << " ";
-    //std::cerr << std::endl;
     std::cout << buf[1] << " ";
     try {
       if (opt == "add_user") {
@@ -70,7 +67,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.UserSys.queryProfile(curUser, UserName);
-      }
+      }//0.1s
       else if (opt == "modify_profile") {
         username curUser, UserName;
         userpassword newPassword;
@@ -153,8 +150,8 @@ signed main(void) {
           }
           else throw(exceptions("Invalid argument"));
         }
-        sys.TrainSys.query_ticket(st_sta, ed_sta, date, opt);
-      }
+        //sys.TrainSys.query_ticket(st_sta, ed_sta, date, opt);
+      }//2.3s左右
       else if (opt == "query_transfer") {
         station st_sta, ed_sta;
         Date date;
@@ -170,7 +167,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.TrainSys.query_transfer(st_sta, ed_sta, date, opt);
-      }
+      }//0s
       else if (opt == "buy_ticket") {
         username UserName;
         trainid trainID;
@@ -192,7 +189,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.buy_ticket(UserName, trainID, date, ticketNum, st_sta, ed_sta, opt);
-      }
+      }//0.8s
       else if (opt == "query_order") {
         username UserName;
         for (int i = 3; i <= cnt; i += 2) {
@@ -200,7 +197,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.query_order(UserName);
-      }
+      }//0s
       else if (opt == "refund_ticket") {
         username UserName;
         int pos = 1;
@@ -211,7 +208,7 @@ signed main(void) {
         }
         sys.refund_ticket(UserName, pos);
         std::cout << "0" << std::endl;
-      }
+      }//0.4s
       else if (opt == "clean") {
         sys.clear();
         std::cout << "0" << std::endl;

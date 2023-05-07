@@ -10,7 +10,7 @@ app.secret_key = "Polaris_Dane"
 
 now_usr = ""
 
-inter = transition("./backend")
+inter = transition("./code")
 
 @app.route("/")
 def home():

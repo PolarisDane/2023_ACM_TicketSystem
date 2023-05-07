@@ -6,6 +6,8 @@
 #include <cstring>
 #include <string>
 
+static std::hash<std::string> HashStr;
+
 template<size_t size>
 class String {
 public:
@@ -25,6 +27,9 @@ public:
   }
   bool empty()const {
     return !strlen(str);
+  }
+  operator std::string()const {
+    return std::string(str);
   }
   String& operator =(const std::string& s) {
     strcpy(str, s.c_str());
@@ -72,13 +77,14 @@ class Stringhash {
 public:
   template<size_t size>
   size_t operator () (const String<size>& str) {
-    size_t hash = 0;
-    for (int i = 0; i < std::strlen(str.str); i++) {
-      hash = hash << 7 ^ str.str[i];
-    }
-    return (hash & 0x7FFFFFFF);
+    return HashStr(str);
   }
 };
+
+template<size_t size>
+size_t getHash(const String<size>& str) {
+  return HashStr(str);
+}
 
 using username = String<21>;
 using userpassword = String<31>;

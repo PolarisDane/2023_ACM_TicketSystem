@@ -45,7 +45,7 @@ public:
 
 private:
 
-  FileSystem<username, User> UserData;
+  FileSystem<size_t, User> UserData;
   HashMap<username, bool, Stringhash>UserStat;
 
 };

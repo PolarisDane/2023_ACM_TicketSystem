@@ -1,9 +1,9 @@
 import subprocess
 
 class transition:
-  def __init__(self, backend):
-    self.backend = backend
-    self.pipe = subprocess.Popen(backend, bufsize = 1024, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+  def __init__(self, code):
+    self.backend = code
+    self.pipe = subprocess.Popen(code, bufsize = 1024, stdin = subprocess.PIPE, stdout = subprocess.PIPE)
   def write(self, str):
     self.pipe.stdin.write((str + '\n').encode(encoding = "UTF-8"))
     self.pipe.stdin.flush()
@@ -11,7 +11,7 @@ class transition:
     ret = ""
     while True:
       cur = self.pipe.stdout.readline().decode(encoding = "UTF-8")
-      if (cur == "~~~~~\n"):
+      if (cur == "~~~~~~~~\n"):
         break
       else:
         ret += cur
