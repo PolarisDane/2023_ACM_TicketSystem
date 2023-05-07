@@ -12,7 +12,6 @@
 #include "BPT.h"
 #include "date.h"
 #include "utils.h"
-#include "FileSystem.h"
 
 const int MAX_STATION_NUM = 101;
 
@@ -142,9 +141,9 @@ class TrainSystem {
 
 private:
 
-  FileSystem<size_t, Train> TrainData;
-  FileSystem<std::pair<size_t, int>, train_ticket> TicketData;
-  FileSystem<std::pair<size_t, size_t>, train_pass> PassData;
+  BPTree<size_t, Train> TrainData;
+  BPTree<std::pair<size_t, int>, train_ticket> TicketData;
+  BPTree<std::pair<size_t, size_t>, train_pass> PassData;
 
 public:
 

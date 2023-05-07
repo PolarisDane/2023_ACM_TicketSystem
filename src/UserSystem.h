@@ -10,7 +10,6 @@
 #include "hashmap.h"
 #include "vector.h"
 #include "BPT.h"
-#include "FileSystem.h"
 
 class User {
 public:
@@ -45,7 +44,7 @@ public:
 
 private:
 
-  FileSystem<size_t, User> UserData;
+  BPTree<size_t, User> UserData;
   HashMap<username, bool, Stringhash>UserStat;
 
 };

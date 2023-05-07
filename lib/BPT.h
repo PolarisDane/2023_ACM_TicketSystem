@@ -77,7 +77,7 @@ public:
     }
   };
 
-  const static int CacheSize = (1 << 19) / sizeof(Node);
+  const static int CacheSize = (1 << 20) / sizeof(Node);
 
   void readNode(int pos, Node& _node) {
     index_file.seekg(headSize + pos * sizeof(Node));
@@ -502,7 +502,7 @@ public:
     if (now.NodeSize >= maxNodeSize) splitNode(now.index);
   }
 
-  void del(Key_Type _key, Value_Type _val) {
+  void del(Key_Type _key) {
     Node now = findNodebyKey(_key);
     int _index = now.LowerBoundKey(_key);
     if (_index == now.NodeSize || now._array[_index].key != _key) return;
@@ -514,18 +514,14 @@ public:
     if (now.NodeSize < minNodeSize) maintainNode(now.index);
   }
 
-  vector<Value_Type> find(const Key_Type& _key) {
+  vector<int> find(const Key_Type& _key) {
     Node now = findNodebyKey(_key);
     int pos = now.LowerBoundKey(_key);
-    Value_Type tmp;
-    vector<Value_Type> vec;
+    vector<int> vec;
     while (true) {
       for (int i = pos; i < now.NodeSize; i++) {
         if (now._array[i].key > _key) return vec;
-        if (now._array[i].key == _key) {
-          readVal(now._array[i].pos, tmp);
-          vec.push_back(tmp);
-        }
+        if (now._array[i].key == _key) vec.push_back(now._array[i].pos);
       }
       pos = 0;
       if (now.nxt == -1) return vec;

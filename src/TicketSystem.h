@@ -8,7 +8,6 @@
 #include <cmath>
 #include "UserSystem.h"
 #include "TrainSystem.h"
-#include "FileSystem.h"
 
 class user_ticket {
 public:
@@ -53,12 +52,14 @@ public:
 
 class TicketSystem {
 public:
+  int TimeTag;
   UserSystem UserSys;
   TrainSystem TrainSys;
-  FileSystem<size_t, user_ticket> UserTicketData;
-  FileSystem<std::pair<size_t, int>, pend_ticket> PendData;
+  BPTree<size_t, int> UserTicketCnt;
+  BPTree<std::pair<size_t,int>, user_ticket> UserTicketData;
+  BPTree<std::pair<std::pair<size_t, int>, int>, pend_ticket> PendData;
 public:
-  TicketSystem() :UserTicketData("UserTicket"), PendData("Pend") {}
+  TicketSystem() :UserTicketCnt("UserTicketCnt"), UserTicketData("UserTicket"), PendData("Pend"), TimeTag(0) {}
   ~TicketSystem() = default;
 
   int buy_ticket(const username& UserName, const trainid& trainID, const Date& date, const int& ticketNum,
