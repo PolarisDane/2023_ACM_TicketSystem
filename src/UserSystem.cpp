@@ -13,8 +13,8 @@ int UserSystem::addUser(const username& curUser, const username& newName, const 
   if (!UserStat[curUser]) throw(exceptions("Not loginned"));
 
   auto res = UserData.find(curHash);
-  if (res.empty()) throw(exceptions("User doesn't exist"));
-  User user; UserData.readVal(res[0], user);
+  if (!res) throw(exceptions("User doesn't exist"));
+  User user; UserData.readVal(res, user);
 
   if (UserData.count(newHash)) throw(exceptions("Identical username"));
   if (user.privilege <= newP) throw(exceptions("Authority not enough"));
@@ -29,8 +29,8 @@ int UserSystem::loginUser(const username& UserName, const userpassword& UserPass
   if (UserStat[UserName]) throw(exceptions("Already loginned"));
 
   auto res = UserData.find(getHash(UserName));
-  if (res.empty()) throw(exceptions("User doesn't exist"));
-  User user; UserData.readVal(res[0], user);
+  if (!res) throw(exceptions("User doesn't exist"));
+  User user; UserData.readVal(res, user);
 
   if (user.UserPassword != UserPassword) throw(exceptions("Wrong password"));
 
@@ -50,12 +50,12 @@ int UserSystem::queryProfile(const username& curUser, const username& UserName) 
   size_t tarHash = getHash(UserName), curHash = getHash(curUser);
 
   auto res = UserData.find(curHash);
-  if (res.empty()) throw(exceptions("User doesn't exist"));
-  User user; UserData.readVal(res[0], user);
+  if (!res) throw(exceptions("User doesn't exist"));
+  User user; UserData.readVal(res, user);
 
   res = UserData.find(tarHash);
-  if (res.empty()) throw(exceptions("Target user doesn't exist"));
-  User tar; UserData.readVal(res[0], tar);
+  if (!res) throw(exceptions("Target user doesn't exist"));
+  User tar; UserData.readVal(res, tar);
 
   if (user.privilege <= tar.privilege && curHash != tarHash) throw(exceptions("Authority not enough"));
 
@@ -70,12 +70,12 @@ int UserSystem::modifyProfile(const username& curUser, const username& UserName,
   size_t tarHash = getHash(UserName), curHash = getHash(curUser);
 
   auto res = UserData.find(curHash);
-  if (res.empty()) throw(exceptions("User doesn't exist"));
-  User user; UserData.readVal(res[0], user);
+  if (!res) throw(exceptions("User doesn't exist"));
+  User user; UserData.readVal(res, user);
 
   res = UserData.find(tarHash);
-  if (res.empty()) throw(exceptions("Target user doesn't exist"));
-  User tar; UserData.readVal(res[0], tar);
+  if (!res) throw(exceptions("Target user doesn't exist"));
+  User tar; UserData.readVal(res, tar);
 
   if (user.privilege <= tar.privilege && curHash != tarHash) throw(exceptions("Authority not enough"));
   if (user.privilege <= newP) throw(exceptions("Authority not enough"));
@@ -85,7 +85,7 @@ int UserSystem::modifyProfile(const username& curUser, const username& UserName,
   if (!newMail.empty()) tar.UserMail = newMail;
   if (newP != -1) tar.privilege = newP;
 
-  UserData.writeVal(res[0], tar);
+  UserData.writeVal(res, tar);
   std::cout << tar.UserName << " " << tar.UserRealName << " " << tar.UserMail << " " << tar.privilege << std::endl;
   return 0;
 }

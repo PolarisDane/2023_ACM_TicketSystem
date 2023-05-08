@@ -150,7 +150,7 @@ signed main(void) {
           }
           else throw(exceptions("Invalid argument"));
         }
-        sys.TrainSys.query_ticket(st_sta, ed_sta, date, opt);
+        //sys.TrainSys.query_ticket(st_sta, ed_sta, date, opt);
       }//2.3s左右
       else if (opt == "query_transfer") {
         station st_sta, ed_sta;

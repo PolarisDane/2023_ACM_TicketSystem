@@ -86,8 +86,8 @@ int TrainSystem::delete_train(const trainid& trainID) {
   size_t trainHash = getHash(trainID);
 
   auto res = TrainData.find(trainHash);
-  if (res.empty()) throw(exceptions("Train doesn't exist"));
-  Train train; TrainData.readVal(res[0], train);
+  if (!res) throw(exceptions("Train doesn't exist"));
+  Train train; TrainData.readVal(res, train);
 
   if (train.release) throw(exceptions("Train already released"));
 
@@ -100,13 +100,13 @@ int TrainSystem::release_train(const trainid& trainID) {
   size_t trainHash = getHash(trainID);
 
   auto res = TrainData.find(trainHash);
-  if (res.empty()) throw(exceptions("Train doesn't exist"));
-  Train train; TrainData.readVal(res[0], train);
+  if (!res) throw(exceptions("Train doesn't exist"));
+  Train train; TrainData.readVal(res, train);
 
   if (train.release) throw(exceptions("Train already released"));
 
   train.release = true;
-  TrainData.writeVal(res[0], train);
+  TrainData.writeVal(res, train);
 
   train_ticket ticket(train.stationNum, train.seatNum);
   for (int i = 0; i <= train.ed_date - train.st_date; i++)
@@ -122,8 +122,8 @@ int TrainSystem::release_train(const trainid& trainID) {
 
 int TrainSystem::query_train(const trainid& trainID, const Date& date) {
   auto res = TrainData.find(getHash(trainID));
-  if (res.empty()) throw(exceptions("Train doesn't exist"));
-  Train train; TrainData.readVal(res[0], train);
+  if (!res) throw(exceptions("Train doesn't exist"));
+  Train train; TrainData.readVal(res, train);
 
   if (date<train.st_date || date>train.ed_date) throw(exceptions("Train not found"));
 
@@ -143,7 +143,7 @@ int TrainSystem::query_train(const trainid& trainID, const Date& date) {
       if (!train.release) std::cout << train.seatNum << std::endl;
       else {
         auto res = TicketData.find(std::make_pair(getHash(train.trainID), days));
-        train_ticket ret; TicketData.readVal(res[0], ret);
+        train_ticket ret; TicketData.readVal(res, ret);
         std::cout << ret.remain[i] + ret.tag[train_ticket::get_id(i)] << std::endl;
       }
     }
@@ -174,7 +174,7 @@ int TrainSystem::query_ticket(const station& st_sta, const station& ed_sta, cons
       if (days < 0 || days > st_pass.ed_date - st_pass.st_date) continue;
 
       auto ret = TicketData.find(std::make_pair(getHash(st_pass.trainID), days));
-      train_ticket ticket; TicketData.readVal(ret[0], ticket);
+      train_ticket ticket; TicketData.readVal(ret, ticket);
       trip_ticket trip(st_pass.trainID, st_pass.st_time + days * 1440 + st_pass.leave_time,
         st_pass.st_time + days * 1440 + ed_pass.arriv_time, ed_pass.priceSum - st_pass.priceSum, ticket.query_ticket(st_pass.pos, ed_pass.pos));
       ans.push_back(trip);
@@ -241,7 +241,7 @@ int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, co
     if (st_days < 0 || st_days > pass_st[p1].ed_date - pass_st[p1].st_date) continue;
 
     auto res = TrainData.find(getHash(pass_st[p1].trainID));
-    Train train_st; TrainData.readVal(res[0], train_st);
+    Train train_st; TrainData.readVal(res, train_st);
 
     transfer_mp.clear();
     for (int i = pass_st[p1].pos + 1; i <= train_st.stationNum; i++) transfer_mp[train_st.stations[i]] = i;
@@ -250,7 +250,7 @@ int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, co
       if (pass_st[p1].trainID == pass_ed[p2].trainID) continue;
 
       res = TrainData.find(getHash(pass_ed[p2].trainID));
-      Train train_ed; TrainData.readVal(res[0], train_ed);
+      Train train_ed; TrainData.readVal(res, train_ed);
 
       for (int i = 1; i <= pass_ed[p2].pos - 1; i++) {
         int inter_sta_pos = transfer_mp[train_ed.stations[i]];//车站在 train_st 中的位置
@@ -267,11 +267,11 @@ int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, co
         if (ed_days > pass_ed[p2].ed_date - pass_ed[p2].st_date) continue;
 
         res = TicketData.find(std::make_pair(getHash(train_st.trainID), st_days));
-        train_ticket st_ticket; TicketData.readVal(res[0], st_ticket);
+        train_ticket st_ticket; TicketData.readVal(res, st_ticket);
         int rem_seat_st = st_ticket.query_ticket(pass_st[p1].pos, inter_sta_pos);
 
         res = TicketData.find(std::make_pair(getHash(train_ed.trainID), ed_days));
-        train_ticket ed_ticket; TicketData.readVal(res[0], ed_ticket);
+        train_ticket ed_ticket; TicketData.readVal(res, ed_ticket);
         int rem_seat_ed = ed_ticket.query_ticket(i, pass_ed[p2].pos);
 
         transfer_ticket nowAns = std::make_pair(

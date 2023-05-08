@@ -514,32 +514,13 @@ public:
     if (now.NodeSize < minNodeSize) maintainNode(now.index);
   }
 
-  Value_Type findVal(const Key_Type& _key) {
+  int find(const Key_Type& _key) {
     Node now = findNodebyKey(_key);
     int pos = now.LowerBoundKey(_key);
-    Value_Type tmp;
-    while (true) {
-      for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) return Value_Type();
-        if (now._array[i].key == _key) {
-          readVal(now._array[i].pos, tmp);
-          return tmp;
-        }
-      }
-      pos = 0;
-      if (now.nxt == -1) return Value_Type();
-      Cache.find(now.nxt, now);
-    }
-  }
-
-  int findPos(const Key_Type& _key) {
-    Node now = findNodebyKey(_key);
-    int pos = now.LowerBoundKey(_key);
-    vector<int> vec;
     while (true) {
       for (int i = pos; i < now.NodeSize; i++) {
         if (now._array[i].key > _key) return 0;
-        if (now._array[i].key == _key) now._array[i].pos;
+        if (now._array[i].key == _key) return now._array[i].pos;
       }
       pos = 0;
       if (now.nxt == -1) return 0;
@@ -578,6 +559,7 @@ public:
   void clear() {
     Mem.clear();
     nodeCnt = -1;
+    valCnt = 0;
     Node _root(++nodeCnt);
     Cache.insert(root_index = _root.index, _root);
     siz = 0;
