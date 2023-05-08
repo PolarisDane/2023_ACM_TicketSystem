@@ -23,19 +23,19 @@ int TicketSystem::buy_ticket(const username& UserName, const trainid& trainID, c
   int days = date - (train.st_time + train.leave_time[st]).date;
   if (days > train.ed_date - train.st_date || days < 0) throw(exceptions("Train doesn't exist"));
 
-  res = TrainSys.TicketData.find(std::make_pair(getHash(trainID), days));
-  train_ticket ticket; TrainSys.TicketData.readVal(res[0], ticket);
-
   user_ticket userTicket(UserName, 1, trainID, train.st_date + days, st_sta, ed_sta,
     ticketNum, train.st_time + days * 1440 + train.arriv_time[ed], train.st_time + days * 1440 + train.leave_time[st], train.price[ed] - train.price[st], days, st, ed);
 
   int userTicketCnt;
   res = UserTicketCnt.find(getHash(UserName));
-  if (res.empty()) UserTicketCnt.insert(getHash(UserName), 1);
+  if (res.empty()) UserTicketCnt.insert(getHash(UserName), userTicketCnt = 1);
   else {
     UserTicketCnt.readVal(res[0], userTicketCnt);
     UserTicketCnt.writeVal(res[0], ++userTicketCnt);
   }
+
+  res = TrainSys.TicketData.find(std::make_pair(getHash(trainID), days));
+  train_ticket ticket; TrainSys.TicketData.readVal(res[0], ticket);
 
   if (ticket.query_ticket(st, ed) >= ticketNum) {
     UserTicketData.insert(std::make_pair(getHash(UserName), userTicketCnt), userTicket);

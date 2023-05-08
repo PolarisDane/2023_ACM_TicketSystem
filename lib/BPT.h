@@ -187,7 +187,7 @@ public:
       index_file.open(file_name + "_Node.db", std::ios::binary | std::ios::out | std::ios::in);
       create.open(file_name + "_Val.db", std::ios::out); create.close();
       value_file.open(file_name + "_Val.db", std::ios::binary | std::ios::out | std::ios::in);
-      valCnt = -1;
+      valCnt = 0;
       nodeCnt = -1;
       Node _root(++nodeCnt);
       Cache.insert(root_index = _root.index, _root);
@@ -514,17 +514,35 @@ public:
     if (now.NodeSize < minNodeSize) maintainNode(now.index);
   }
 
-  vector<int> find(const Key_Type& _key) {
+  Value_Type findVal(const Key_Type& _key) {
+    Node now = findNodebyKey(_key);
+    int pos = now.LowerBoundKey(_key);
+    Value_Type tmp;
+    while (true) {
+      for (int i = pos; i < now.NodeSize; i++) {
+        if (now._array[i].key > _key) return Value_Type();
+        if (now._array[i].key == _key) {
+          readVal(now._array[i].pos, tmp);
+          return tmp;
+        }
+      }
+      pos = 0;
+      if (now.nxt == -1) return Value_Type();
+      Cache.find(now.nxt, now);
+    }
+  }
+
+  int findPos(const Key_Type& _key) {
     Node now = findNodebyKey(_key);
     int pos = now.LowerBoundKey(_key);
     vector<int> vec;
     while (true) {
       for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) return vec;
-        if (now._array[i].key == _key) vec.push_back(now._array[i].pos);
+        if (now._array[i].key > _key) return 0;
+        if (now._array[i].key == _key) now._array[i].pos;
       }
       pos = 0;
-      if (now.nxt == -1) return vec;
+      if (now.nxt == -1) return 0;
       Cache.find(now.nxt, now);
     }
   }
