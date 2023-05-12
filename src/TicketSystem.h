@@ -52,14 +52,13 @@ public:
 
 class TicketSystem {
 public:
-  int TimeTag;
   UserSystem UserSys;
   TrainSystem TrainSys;
   BPTree<size_t, int> UserTicketCnt;
   BPTree<std::pair<size_t,int>, user_ticket> UserTicketData;
   BPTree<std::pair<std::pair<size_t, int>, int>, pend_ticket> PendData;
 public:
-  TicketSystem() :UserTicketCnt("UserTicketCnt"), UserTicketData("UserTicket"), PendData("Pend"), TimeTag(0) {}
+  TicketSystem() :UserTicketCnt("UserTicketCnt"), UserTicketData("UserTicket"), PendData("Pend") {}
   ~TicketSystem() = default;
 
   int buy_ticket(const username& UserName, const trainid& trainID, const Date& date, const int& ticketNum,

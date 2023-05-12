@@ -29,45 +29,45 @@ train_ticket::train_ticket(const int& stationNum, const int& seatNum) {
 
 int train_ticket::query_ticket(int st, int ed) {
   int ans = 2e9; ed--;
-  for (int i = st; i <= ed; i++) ans = std::min(ans, remain[i]);
-  //int id1 = get_id(st), id2 = get_id(ed);
-  //if (id1 == id2) {
-  //  for (int i = st; i <= ed; i++) ans = std::min(ans, remain[i] + tag[id1]);
-  //  return ans;
-  //}
-  //for (int i = id1 + 1; i <= id2 - 1; i++)
-  //  ans = std::min(ans, block[i]);
-  //for (int i = st; i <= id1 * block_len; i++)
-  //  ans = std::min(ans, remain[i] + tag[id1]);
-  //for (int i = (id2 - 1) * block_len + 1; i <= ed; i++)
-  //  ans = std::min(ans, remain[i] + tag[id2]);
+  //for (int i = st; i <= ed; i++) ans = std::min(ans, remain[i]);
+  int id1 = get_id(st), id2 = get_id(ed);
+  if (id1 == id2) {
+    for (int i = st; i <= ed; i++) ans = std::min(ans, remain[i] + tag[id1]);
+    return ans;
+  }
+  for (int i = id1 + 1; i <= id2 - 1; i++)
+    ans = std::min(ans, block[i]);
+  for (int i = st; i <= id1 * block_len; i++)
+    ans = std::min(ans, remain[i] + tag[id1]);
+  for (int i = (id2 - 1) * block_len + 1; i <= ed; i++)
+    ans = std::min(ans, remain[i] + tag[id2]);
   return ans;
 }
 
 void train_ticket::modify_ticket(int st, int ed, const int& cnt) {
   ed--;
-  for (int i = st; i <= ed; i++) remain[i] += cnt;
-  //int id1 = get_id(st), id2 = get_id(ed);
-  //if (id1 == id2) {
-  //  for (int i = st; i <= ed; i++) remain[i] += cnt;
-  //  block[id1] = 2e9;
-  //  for (int i = (id1 - 1) * block_len + 1; i <= std::min(id1 * block_len, stationCnt - 1); i++)
-  //    block[id1] = std::min(block[id1], remain[i] + tag[id1]);
-  //  return;
-  //}
-  //for (int i = id1 + 1; i <= id2 - 1; i++) {
-  //  block[i] += cnt; tag[i] += cnt;
-  //}
-  //for (int i = st; i <= id1 * block_len; i++)
-  //  remain[i] += cnt;
-  //block[id1] = 2e9;
-  //for (int i = (id1 - 1) * block_len + 1; i <= id1 * block_len; i++)
-  //  block[id1] = std::min(block[id1], remain[i] + tag[id1]);
-  //for (int i = (id2 - 1) * block_len + 1; i <= ed; i++)
-  //  remain[i] += cnt;
-  //block[id2] = 2e9;
-  //for (int i = (id2 - 1) * block_len + 1; i <= std::min(id2 * block_len, stationCnt - 1); i++)
-  //  block[id2] = std::min(block[id2], remain[i] + tag[id2]);
+  //for (int i = st; i <= ed; i++) remain[i] += cnt;
+  int id1 = get_id(st), id2 = get_id(ed);
+  if (id1 == id2) {
+    for (int i = st; i <= ed; i++) remain[i] += cnt;
+    block[id1] = 2e9;
+    for (int i = (id1 - 1) * block_len + 1; i <= std::min(id1 * block_len, stationCnt - 1); i++)
+      block[id1] = std::min(block[id1], remain[i] + tag[id1]);
+    return;
+  }
+  for (int i = id1 + 1; i <= id2 - 1; i++) {
+    block[i] += cnt; tag[i] += cnt;
+  }
+  for (int i = st; i <= id1 * block_len; i++)
+    remain[i] += cnt;
+  block[id1] = 2e9;
+  for (int i = (id1 - 1) * block_len + 1; i <= id1 * block_len; i++)
+    block[id1] = std::min(block[id1], remain[i] + tag[id1]);
+  for (int i = (id2 - 1) * block_len + 1; i <= ed; i++)
+    remain[i] += cnt;
+  block[id2] = 2e9;
+  for (int i = (id2 - 1) * block_len + 1; i <= std::min(id2 * block_len, stationCnt - 1); i++)
+    block[id2] = std::min(block[id2], remain[i] + tag[id2]);
 }
 
 int TrainSystem::add_train(const trainid& newID, const int& newstationNum, const int& newseatNum, station* _stations, int* _price, const Time& new_st_time,
@@ -160,13 +160,16 @@ int TrainSystem::query_ticket(const station& st_sta, const station& ed_sta, cons
   auto iter_ed_1 = PassData.lower_bound(std::make_pair(getHash(ed_sta), 0));
   auto iter_ed_2 = PassData.lower_bound(std::make_pair(getHash(ed_sta), UINT64_MAX));
 
-  for (; iter_st_1 != iter_st_2; iter_st_1++) {
+  for (; iter_st_1 != iter_st_2; ++iter_st_1) {
     size_t train_hash = iter_st_1.get_key().second;
-    while (iter_ed_1 != iter_ed_2 && train_hash > iter_ed_1.get_key().second) iter_ed_1++;
+    while (iter_ed_1 != iter_ed_2 && train_hash > iter_ed_1.get_key().second) ++iter_ed_1;
     if (iter_ed_1 == iter_ed_2) break;
     if (train_hash == iter_ed_1.get_key().second) {
+
       train_pass st_pass = iter_st_1.get_val();
       train_pass ed_pass = iter_ed_1.get_val();
+
+      //std::cout << "st_pos:" << st_pass.pos << " ed_pos:" << ed_pass.pos << std::endl;
 
       if (st_pass.pos >= ed_pass.pos) continue;
 
@@ -180,32 +183,6 @@ int TrainSystem::query_ticket(const station& st_sta, const station& ed_sta, cons
       ans.push_back(trip);
     }
   }
-
-  //auto res1 = PassData.data.find(st_sta);
-  //auto res2 = PassData.data.find(ed_sta);
-  //vector<train_pass> res_st;
-  //train_pass tmp; mp.clear();
-  //for (int i = 0; i < res1.size(); i++) {
-  //  PassData.read(res1[i], tmp);
-  //  res_st.push_back(tmp);
-  //  mp[tmp.trainID] = i;
-  //}
-  //for (int i = 0; i < res2.size(); i++) {
-  //  PassData.read(res2[i], tmp);
-  //  if (mp.find(tmp.trainID)) {
-  //    int p1 = mp[tmp.trainID];
-  //    if (res_st[p1].pos >= tmp.pos) continue;
-
-  //    int days = date - (res_st[p1].st_time + res_st[p1].leave_time).date;
-  //    if (days < 0 || days>res_st[p1].ed_date - res_st[p1].st_date) continue;
-
-  //    auto ret = TicketData.data.find(std::make_pair(tmp.trainID, days));
-  //    train_ticket ticket; TicketData.read(ret[0], ticket);
-  //    trip_ticket trip(tmp.trainID, res_st[p1].st_time + days * 1440 + res_st[p1].leave_time,
-  //      res_st[p1].st_time + days * 1440 + tmp.arriv_time, tmp.priceSum - res_st[p1].priceSum, ticket.query_ticket(res_st[p1].pos, tmp.pos));
-  //    ans.push_back(trip);
-  //  }
-  //}
 
   if (opt == 0) sort<trip_ticket, cmpByTime>(ans, 0, ans.size() - 1);
   else if (opt == 1) sort<trip_ticket, cmpByCost>(ans, 0, ans.size() - 1);
@@ -229,9 +206,9 @@ int TrainSystem::query_transfer(const station& st_sta, const station& ed_sta, co
   auto iter_ed_2 = PassData.lower_bound(std::make_pair(getHash(ed_sta), UINT64_MAX));
 
   vector<train_pass> pass_st, pass_ed;
-  for (; iter_st_1 != iter_st_2; iter_st_1++) 
+  for (; iter_st_1 != iter_st_2; ++iter_st_1) 
     pass_st.push_back(iter_st_1.get_val());
-  for (; iter_ed_1 != iter_ed_2; iter_ed_1++)
+  for (; iter_ed_1 != iter_ed_2; ++iter_ed_1)
     pass_ed.push_back(iter_ed_1.get_val());
   HashMap<station, int, Stringhash> transfer_mp;
 

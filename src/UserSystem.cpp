@@ -21,6 +21,7 @@ int UserSystem::addUser(const username& curUser, const username& newName, const 
 
   User newUser(newName, newPassword, newRealname, newMail, newP);
   UserData.insert(newHash, newUser);
+
   return 0;
 }
 

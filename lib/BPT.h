@@ -8,13 +8,12 @@
 #include <string>
 #include <cmath>
 #include <fstream>
+#include "exceptions.h"
 #include "list.h"
 #include "hashmap.h"
-#include "vector.h"
 #include "MemPool.h"
 
 const int headSize = 4 * (int)sizeof(int);
-//const int CacheSize = 1000;
 
 template<class Key_Type, class Value_Type, class Hash_Func = std::hash<int>>
 class BPTree {
@@ -25,7 +24,7 @@ public:
   public:
     Key_Type key;
     int pos;
-    myPair() :pos(0) {}
+    myPair() {}
     myPair(Key_Type _key, int _pos) :key(_key), pos(_pos) {}
     myPair(const myPair& other) {
       key = other.key; pos = other.pos;
@@ -58,20 +57,39 @@ public:
   public:
     myPair _array[maxNodeSize];
     int pre, nxt;
-    int index, fa;
+    int index;
     int NodeSize;
     bool is_leaf;
-    Node() :index(0), pre(-1), nxt(-1), fa(-1), NodeSize(0), is_leaf(1) {}
-    Node(int _index) :index(_index), pre(-1), nxt(-1), fa(-1), NodeSize(0), is_leaf(1) {}
+    Node() :index(-1), pre(-1), nxt(-1), NodeSize(0), is_leaf(1) {}
+    Node(int _index) :index(_index), pre(-1), nxt(-1), NodeSize(0), is_leaf(1) {}
     ~Node() {}
+    void insert(const myPair& data, int pos) {
+      for (int i = NodeSize; i >= pos; i--) _array[i] = _array[i - 1];
+      NodeSize++; _array[pos] = data;
+    }
+    void del(int pos) {
+      NodeSize--;
+      for (int i = pos; i <= NodeSize - 1; i++) _array[i] = _array[i + 1];
+    }
     int LowerBoundKey(const Key_Type& _key)const {
       int l = 0, r = NodeSize - 1, _index = NodeSize;
       while (l <= r) {
         int mid = (l + r) >> 1;
-        if (_array[mid].key >= _key) {
+        if (_array[mid].key < _key) l = mid + 1;
+        else {
           r = mid - 1; _index = mid;
         }
-        else l = mid + 1;
+      }
+      return _index;
+    }
+    int UpperBoundKey(const Key_Type& _key)const {
+      int l = 0, r = NodeSize - 1, _index = NodeSize;
+      while (l <= r) {
+        int mid = (l + r) >> 1;
+        if (_array[mid].key <= _key) l = mid + 1;
+        else {
+          r = mid - 1; _index = mid;
+        }
       }
       return _index;
     }
@@ -123,7 +141,8 @@ public:
     }
     //清空缓存将数据全部写入外存
 
-    void insert(const int _key, const Node& _val) {
+    void insert(const int _key, Node& _val) {
+      //BPT->writeNode(_key, _val);
       if (!map.find(_key)) {
         if (ls.size() == capacity) {
           BPT->writeNode((*ls.front()).first, (*ls.front()).second);
@@ -131,19 +150,22 @@ public:
           map.erase((*ls.front()).first);
           ls.del(ls.front());
         }
+        map[_key] = ls.insert(std::make_pair(_key, _val));
       }
-      else ls.del(map[_key]);
-      map[_key] = ls.insert(std::make_pair(_key, _val));
+      else {
+        (*map[_key]).second = _val;
+        ls.move(map[_key]);
+      }
     }
 
     void find(const int _key, Node& _node) {
+      //BPT->readNode(_key, _node);
       if (!map.find(_key)) {
         BPT->readNode(_key, _node); insert(_key, _node);
         return;
       }
       _node = (*map[_key]).second;
-      ls.del(map[_key]);
-      map[_key] = ls.insert(std::make_pair(_key, _node));
+      ls.move(map[_key]);
     }
 
     void clear() {
@@ -165,8 +187,7 @@ public:
   Node null;
 
   int alloc_Node() {
-    if (Mem.empty()) return ++nodeCnt;
-    else return Mem.back();
+    return ++nodeCnt;
   }
 
 public:
@@ -259,16 +280,11 @@ public:
       return !((*this) == other);
     }
     void get_nxt() {
-      if (pos == -1) throw(exceptions("Iterator Out Of Bound"));
+      if (curNode.index == -1) throw(exceptions("Iterator Out Of Bound"));
       if (pos == curNode.NodeSize - 1) {
-        if (curNode.nxt != -1) {
-          BPT->Cache.find(curNode.nxt, curNode);
-          pos = 0;
-        }
-        else {
-          curNode = BPT->null;
-          pos = -1;
-        }
+        if (curNode.nxt != -1) BPT->Cache.find(curNode.nxt, curNode);
+        else curNode = BPT->null;
+        pos = 0;
       }
       else pos++;
     }
@@ -310,254 +326,171 @@ public:
   }
 
   iterator end() {
-    return iterator(this, null, -1);
+    return iterator(this, null, 0);
   }
 
 private:
 
   void split(Node& now, Node& tar) {
-    now.is_leaf = tar.is_leaf; now.fa = tar.fa;
-    Node tmp;
-    for (int i = tar.NodeSize / 2; i < tar.NodeSize; i++) {
+    now.is_leaf = tar.is_leaf;
+    for (int i = tar.NodeSize / 2; i < tar.NodeSize; i++)
       now._array[now.NodeSize++] = tar._array[i];
-      if (!tar.is_leaf) {
-        Cache.find(tar._array[i].pos, tmp);
-        tmp.fa = now.index;
-        Cache.insert(tar._array[i].pos, tmp);
-      }
-    }
     tar.NodeSize /= 2;
   }
 
   void merge(Node& now, Node& tar) {
-    Node tmp;
-    for (int i = 0; i < now.NodeSize; i++) {
+    for (int i = 0; i < now.NodeSize; i++)
       tar._array[tar.NodeSize++] = now._array[i];
-      if (!now.is_leaf) {
-        Cache.find(now._array[i].pos, tmp);
-        tmp.fa = tar.index;
-        Cache.insert(now._array[i].pos, tmp);
-      }
-    }
     Mem.insert(now.index);
   }
 
-  Node findNodebyKey(const Key_Type& _key) {
-    Node now; Cache.find(root_index, now);
-    while (!now.is_leaf) {
-      int l = 0, r = now.NodeSize - 1, _index = 0;
-      while (l <= r) {
-        int mid = (l + r) >> 1;
-        if (now._array[mid].key > _key) r = mid - 1;
-        else {
-          l = mid + 1;
-          _index = mid;
-        }
-      }
-      Cache.find(now._array[_index].pos, now);
-    }
-    return now;
-  }
-
-  void splitNode(int nowPos) {
-    Node now; Cache.find(nowPos, now);
+  void splitNode(Node& now, Node& fa, const int& now_pos) {
     Node newNode(alloc_Node());
     split(newNode, now);
-    if (now.index != root_index) {
-      if (now.nxt != -1) {
-        Node nxtNode; Cache.find(now.nxt, nxtNode);
+    newNode.nxt = now.nxt; newNode.pre = now.index;
+    now.nxt = newNode.index;
+    Cache.insert(now.index, now); Cache.insert(newNode.index, newNode);
+    if (now.index == root_index) {
+      Node _root(alloc_Node());
+      _root._array[0].key = now._array[now.NodeSize - 1].key;
+      _root._array[0].pos = now.index;
+      _root._array[1].key = newNode._array[newNode.NodeSize - 1].key;
+      _root._array[1].pos = newNode.index;
+      _root.NodeSize = 2; _root.is_leaf = 0;
+      Cache.insert(_root.index, _root);
+      root_index = _root.index;
+    }
+    else {
+      if (newNode.nxt != -1) {
+        Node nxtNode; Cache.find(newNode.nxt, nxtNode);
         nxtNode.pre = newNode.index;
         Cache.insert(nxtNode.index, nxtNode);
       }
-      newNode.nxt = now.nxt;
-      now.nxt = newNode.index; newNode.pre = now.index;
-      Cache.insert(now.index, now);
-      Cache.insert(newNode.index, newNode);
-      Node fa; Cache.find(now.fa, fa);
-      int pos = fa.LowerBoundKey(newNode._array[0].key);
-      for (int i = fa.NodeSize; i > pos; i--) fa._array[i] = fa._array[i - 1];
-      fa._array[pos].key = newNode._array[0].key;
-      fa._array[pos].pos = newNode.index; fa.NodeSize++;
-      Cache.insert(fa.index, fa);
-      if (fa.NodeSize >= maxNodeSize) splitNode(fa.index);
-    }
-    else {
-      Node _root(alloc_Node());
-      _root._array[0].key = now._array[0].key;
-      _root._array[0].pos = now.index;
-      _root._array[1].key = newNode._array[0].key;
-      _root._array[1].pos = newNode.index;
-      now.nxt = newNode.index; newNode.pre = now.index;
-      now.fa = newNode.fa = _root.index;
-      _root.NodeSize = 2; _root.is_leaf = 0;
-      Cache.insert(_root.index, _root);
-      Cache.insert(now.index, now); Cache.insert(newNode.index, newNode);
-      root_index = _root.index;
+      fa._array[now_pos].key = now._array[now.NodeSize - 1].key;
+      fa.insert(myPair(newNode._array[newNode.NodeSize - 1].key, newNode.index), now_pos + 1);
     }
   }
 
-  void mergeNode(int nowPos) {
-    Node now; Cache.find(nowPos, now);
-    if (now.index == root_index) {
-      if (now.NodeSize == 1 && !now.is_leaf) {
-        Node tmp; Cache.find(now._array[0].pos, tmp);
-        tmp.fa = -1; root_index = tmp.index;
-        Cache.insert(tmp.index, tmp);
-      }
-      return;
-    }
-    Node fa, other; Cache.find(now.fa, fa);
-    if (now.index == fa._array[0].pos)
-      Cache.find(now.nxt, other);
+  void maintainNode(Node& now, Node& fa, int now_pos) {
+    Node other;
+    if (!now_pos) Cache.find(now.nxt, other);
     else {
       Cache.find(now.pre, other);
-      std::swap(other, now);
+      std::swap(now, other); now_pos--;
     }
-    merge(other, now);
-    if (other.nxt != -1) {
-      Node nxtNode; Cache.find(other.nxt, nxtNode);
-      nxtNode.pre = now.index;
-      Cache.insert(nxtNode.index, nxtNode);
-    }
-    now.nxt = other.nxt;
-    Cache.insert(now.index, now);
-    int pos = fa.LowerBoundKey(other._array[0].key);
-    for (int i = pos; i < fa.NodeSize; i++) fa._array[i] = fa._array[i + 1];
-    fa.NodeSize--;
-    Cache.insert(fa.index, fa);
-    if (fa.NodeSize < minNodeSize) maintainNode(fa.index);
-  }
-
-  void update(Node now, Key_Type _key) {
-    Node fa; Cache.find(now.fa, fa);
-    while (now.index == fa._array[0].pos) {
-      fa._array[0].key = now._array[0].key;
-      Cache.insert(fa.index, fa); now = fa;
-      if (fa.index == root_index) return;
-      Cache.find(now.fa, fa);
-    }
-    int pos = fa.LowerBoundKey(_key);
-    fa._array[pos].key = now._array[0].key;
-    Cache.insert(fa.index, fa);
-  }
-
-  void maintainNode(int nowPos) {
-    Node now; Cache.find(nowPos, now);
-    if (now.index == root_index) {
-      if (now.NodeSize == 1 && !now.is_leaf) {
-        Node tmp; Cache.find(now._array[0].pos, tmp);
-        tmp.fa = -1; root_index = tmp.index;
-        Cache.insert(tmp.index, tmp);
+    if (now.NodeSize <= minNodeSize && other.NodeSize <= minNodeSize) {
+      merge(other, now);
+      now.nxt = other.nxt;
+      Cache.insert(now.index, now);
+      if (now.nxt != -1) {
+        Node nxtNode; Cache.find(now.nxt, nxtNode);
+        nxtNode.pre = now.index; Cache.insert(nxtNode.index, nxtNode);
       }
-      return;
-    }
-    Node fa; Cache.find(now.fa, fa);
-    if (now.index == fa._array[0].pos) {
-      Node nxtNode; Cache.find(now.nxt, nxtNode);
-      if (nxtNode.NodeSize > minNodeSize) {
-        int pos = fa.LowerBoundKey(nxtNode._array[0].key);
-        now._array[now.NodeSize++] = nxtNode._array[0];
-        if (!now.is_leaf) {
-          Node tmp; Cache.find(nxtNode._array[0].pos, tmp);
-          tmp.fa = now.index; Cache.insert(tmp.index, tmp);
-        }
-        for (int i = 0; i < nxtNode.NodeSize; i++) nxtNode._array[i] = nxtNode._array[i + 1];
-        nxtNode.NodeSize--;
-        Cache.insert(now.index, now); Cache.insert(nxtNode.index, nxtNode);
-        fa._array[pos].key = nxtNode._array[0].key;
-        Cache.insert(fa.index, fa);
+      if (fa.index == root_index && fa.NodeSize == 2) {
+        Mem.insert(root_index); root_index = now.index;
       }
-      else mergeNode(nowPos);
+      else {
+        fa._array[now_pos].key = now._array[now.NodeSize - 1].key;
+        fa.del(now_pos + 1);
+      }
     }
     else {
-      Node preNode; Cache.find(now.pre, preNode);
-      if (preNode.NodeSize > minNodeSize) {
-        int pos = fa.LowerBoundKey(now._array[0].key);
-        for (int i = now.NodeSize; i > 0; i--) now._array[i] = now._array[i - 1];
-        now._array[0] = preNode._array[--preNode.NodeSize]; now.NodeSize++;
-        if (!now.is_leaf) {
-          Node tmp; Cache.find(now._array[0].pos, tmp);
-          tmp.fa = now.index; Cache.insert(tmp.index, tmp);
-        }
-        Cache.insert(now.index, now); Cache.insert(preNode.index, preNode);
-        fa._array[pos].key = now._array[0].key;
-        Cache.insert(fa.index, fa);
+      if (now.NodeSize > minNodeSize) {
+        other.insert(now._array[now.NodeSize - 1], 0);
+        now.del(now.NodeSize - 1);
       }
-      else mergeNode(nowPos);
+      else {
+        now.insert(other._array[0], now.NodeSize);
+        other.del(0);
+      }
+      fa._array[now_pos].key = now._array[now.NodeSize - 1].key;
+      Cache.insert(now.index, now); Cache.insert(other.index, other);
     }
+  }
+
+  void insert(const Key_Type& _key, const int& _val, Node& now, Node& fa, const int& now_pos) {
+    int pos = now.LowerBoundKey(_key);
+    if (pos == now.NodeSize && fa.index != -1) fa._array[now_pos].key = _key;
+    if (now.is_leaf) now.insert(myPair(_key, _val), pos);
+    else {
+      if (pos == now.NodeSize) pos--;
+      Node nxt_now; Cache.find(now._array[pos].pos, nxt_now);
+      insert(_key, _val, nxt_now, now, pos);
+    }
+    if (now.NodeSize >= maxNodeSize) splitNode(now, fa, now_pos);
+    else Cache.insert(now.index, now);
+  }
+
+  void del(const Key_Type& _key, Node& now, Node& fa, const int& now_pos) {
+    int pos = now.LowerBoundKey(_key);
+    if (pos == now.NodeSize) return;//Can't be found
+    if (now.is_leaf && now._array[pos].key != _key) return;//Not Found
+    bool flag = now.index == root_index;
+    if (now.is_leaf) {
+      now.del(pos); siz--;
+    }
+    else {
+      Node nxt_now; Cache.find(now._array[pos].pos, nxt_now);
+      del(_key, nxt_now, now, pos);
+    }
+    if (fa.index != -1) fa._array[now_pos].key = now._array[now.NodeSize - 1].key;
+    if (!flag && now.NodeSize < minNodeSize) maintainNode(now, fa, now_pos);
+    else Cache.insert(now.index, now);
   }
 
 public:
 
-  void insert(Key_Type _key, Value_Type _val) {
-    Node now = findNodebyKey(_key);
-    int _index = now.LowerBoundKey(_key);
-    for (int i = now.NodeSize; i > _index; i--) now._array[i] = now._array[i - 1];
-    now._array[_index].key = _key;
-    writeVal(++valCnt, _val);
-    now._array[_index].pos = valCnt;
-    siz++; now.NodeSize++;
-    Cache.insert(now.index, now);
-    if (!_index && now.fa != -1) update(now, now._array[1].key);
-    if (now.NodeSize >= maxNodeSize) splitNode(now.index);
+  void insert(const Key_Type& _key, Value_Type _val) {
+    int pos = ++valCnt; siz++;
+    Node root; Cache.find(root_index, root);
+    insert(_key, pos, root, null, 0);
+    writeVal(pos, _val);
   }
 
-  void del(Key_Type _key) {
-    Node now = findNodebyKey(_key);
-    int _index = now.LowerBoundKey(_key);
-    if (_index == now.NodeSize || now._array[_index].key != _key) return;
-    for (int i = _index; i < now.NodeSize; i++) now._array[i] = now._array[i + 1];
-    now.NodeSize--; siz--;
-    Cache.insert(now.index, now);
-    if (!now.NodeSize) return;
-    if (!_index && now.fa != -1) update(now, _key);
-    if (now.NodeSize < minNodeSize) maintainNode(now.index);
+  void del(const Key_Type& _key) {
+    Node root; Cache.find(root_index, root);
+    del(_key, root, null, 0);
+  }//没有解引用
+
+  iterator lower_bound(const Key_Type& _key) {
+    Node now; Cache.find(root_index, now);
+    while (1) {
+      int pos = now.LowerBoundKey(_key);
+      if (pos == now.NodeSize) return end();
+      if (now.is_leaf) return iterator(this, now, pos);
+      Cache.find(now._array[pos].pos, now);
+    }
+  }
+
+  bool count(const Key_Type& _key) {
+    Node now; Cache.find(root_index, now);
+    while (1) {
+      int pos = now.LowerBoundKey(_key);
+      if (pos == now.NodeSize) return false;
+      if (now.is_leaf) {
+        if (now._array[pos].key == _key) return true;
+        else return false;
+      }
+      Cache.find(now._array[pos].pos, now);
+    }
   }
 
   int find(const Key_Type& _key) {
-    Node now = findNodebyKey(_key);
-    int pos = now.LowerBoundKey(_key);
-    while (true) {
-      for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) return 0;
-        if (now._array[i].key == _key) return now._array[i].pos;
+    Node now; Cache.find(root_index, now);
+    while (1) {
+      int pos = now.LowerBoundKey(_key);
+      if (pos == now.NodeSize) return 0;
+      if (now.is_leaf) {
+        if (now._array[pos].key == _key) return now._array[pos].pos;
+        else return 0;
       }
-      pos = 0;
-      if (now.nxt == -1) return 0;
-      Cache.find(now.nxt, now);
-    }
-  }
-
-  int count(const Key_Type& _key) {
-    Node now = findNodebyKey(_key);
-    int pos = now.LowerBoundKey(_key);
-    int cnt = 0;
-    while (true) {
-      for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key > _key) return 0;
-        if (now._array[i].key == _key) return 1;
-      }
-      pos = 0;
-      if (now.nxt == -1) return 0;
-      Cache.find(now.nxt, now);
-    }
-  }
-
-  iterator lower_bound(const Key_Type& _key) {
-    Node now = findNodebyKey(_key);
-    int pos = now.LowerBoundKey(_key);
-    while (true) {
-      for (int i = pos; i < now.NodeSize; i++) {
-        if (now._array[i].key >= _key) return iterator(this, now, i);
-      }
-      pos = 0;
-      if (now.nxt == -1) return end();
-      Cache.find(now.nxt, now);
+      Cache.find(now._array[pos].pos, now);
     }
   }
 
   void clear() {
     Mem.clear();
+    Cache.clear();
     nodeCnt = -1;
     valCnt = 0;
     Node _root(++nodeCnt);

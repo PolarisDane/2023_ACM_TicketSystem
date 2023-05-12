@@ -108,6 +108,15 @@ public:
     it.pointer = nullptr;
   }
 
+  void move(iterator it) {
+    it.pointer->pre->nxt = it.pointer->nxt;
+    it.pointer->nxt->pre = it.pointer->pre;
+    tail->pre->nxt = it.pointer;
+    it.pointer->pre = tail->pre;
+    it.pointer->nxt = tail;
+    tail->pre = it.pointer;
+  }
+
   void clear() {
     node* it = head, * tmp;
     it = it->nxt;
