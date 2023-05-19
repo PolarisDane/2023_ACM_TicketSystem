@@ -58,9 +58,8 @@ def login():
 @app.route("/user", methods = ["GET", "POST"])
 def user():
   global now_usr
-  msg = request.args.get("msg")
   if now_usr != "":
-    return render_template("user.html", now_usr = now_usr, msg = msg)
+    return render_template("user.html", now_usr = now_usr)
   else:
     flash("Not Logined", "alert")
     return redirect(url_for("login"))
@@ -79,13 +78,17 @@ def logout():
     msg = "Logout success"
     return redirect(url_for("home", msg = msg))
 
-#@app.route("/profile", methods=["GET", "POST"])
-#def profile():
-#  global now_usr
-#  if now_usr != "":
-#    return render_template("profile.html", user_name = now_user)
-#  else:
-#    flash("Not Logined", "alert")
-#    return redirect(url_for("home"))
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+  global now_usr
+  if request.method == "GET":
+    if now_usr != "":
+      return render_template("profile.html", user_name = now_user)
+    else:
+      flash("Not Logined", "alert")
+      return redirect(url_for("home"))
+  if request.method == "POST":
+
+
 if __name__ == "__main__":
   app.run()
