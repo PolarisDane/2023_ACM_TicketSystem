@@ -33,6 +33,10 @@ public:
   UserSystem() :UserData("User") {}
   ~UserSystem() = default;
 
+  bool admin() {
+    return UserData.size();
+  }
+
   int addUser(const username& curUser, const username& newName, const userpassword& newPassword,
     const userrealname& newRealname, const usermail& newMail, const int& newP);
   int loginUser(const username& UserName, const userpassword& UserPassword);

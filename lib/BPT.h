@@ -51,7 +51,7 @@ public:
   };
 
   const static int maxNodeSize = 4096 / (sizeof(myPair) + sizeof(int));
-  const static int minNodeSize = maxNodeSize / 2 - 1;
+  const static int minNodeSize = maxNodeSize / 3 - 1;
 
   class Node {
   public:

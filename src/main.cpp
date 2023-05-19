@@ -8,6 +8,11 @@
 
 signed main(void) {
   TicketSystem sys;
+  //std::cerr << "fuck" << std::endl;
+  //if (!sys.UserSys.admin()) {
+  //  //超级管理员！
+  //  std::cerr << sys.UserSys.addUser("Polaris_Dane", "Polaris_Dane", "5y57576", "陈一星", "2488721971@qq.com", 10) << std::endl;
+  //}
   std::string opt;
   std::string command;
   std::string buf[30];
@@ -67,7 +72,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.UserSys.queryProfile(curUser, UserName);
-      }//0.1s
+      }
       else if (opt == "modify_profile") {
         username curUser, UserName;
         userpassword newPassword;
@@ -151,7 +156,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.TrainSys.query_ticket(st_sta, ed_sta, date, opt);
-      }//2.3s左右
+      }
       else if (opt == "query_transfer") {
         station st_sta, ed_sta;
         Date date;
@@ -167,14 +172,14 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.TrainSys.query_transfer(st_sta, ed_sta, date, opt);
-      }//0s
+      }
       else if (opt == "buy_ticket") {
         username UserName;
         trainid trainID;
         Date date;
         int ticketNum;
         station st_sta, ed_sta;
-        int opt = 0;//默认不要候补票
+        int opt = 0;
         for (int i = 3; i <= cnt; i += 2) {
           if (buf[i] == "-u") UserName = buf[i + 1];
           else if (buf[i] == "-i") trainID = buf[i + 1];
@@ -189,7 +194,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.buy_ticket(UserName, trainID, date, ticketNum, st_sta, ed_sta, opt);
-      }//0.8s
+      }
       else if (opt == "query_order") {
         username UserName;
         for (int i = 3; i <= cnt; i += 2) {
@@ -197,7 +202,7 @@ signed main(void) {
           else throw(exceptions("Invalid argument"));
         }
         sys.query_order(UserName);
-      }//0s
+      }
       else if (opt == "refund_ticket") {
         username UserName;
         int pos = 1;
@@ -208,7 +213,7 @@ signed main(void) {
         }
         sys.refund_ticket(UserName, pos);
         std::cout << "0" << std::endl;
-      }//0.4s
+      }
       else if (opt == "clean") {
         sys.clear();
         std::cout << "0" << std::endl;
@@ -221,8 +226,9 @@ signed main(void) {
     }
     catch (exceptions& e) {
       std::cout << "-1" << std::endl;
-      //std::cout << e.error() << std::endl;
+      std::cout << e.error() << std::endl;
     }
+    std::cout << "$$$$$$$$\n";
   }
   return 0;
 }

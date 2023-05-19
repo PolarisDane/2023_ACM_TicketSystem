@@ -1,8 +1,8 @@
 # TO-DO LIST:
 # 1.响应式布局！！！
-
 from flask import Flask, render_template, request, flash, url_for, redirect
 from transitioner import transition
+import time
 import json
 
 app = Flask(__name__)
@@ -10,49 +10,77 @@ app.secret_key = "Polaris_Dane"
 
 now_usr = ""
 
-inter = transition("./code")
+inter = transition("../code")
 
 @app.route("/")
 def home():
-  return render_template("home.html")
+  return render_template("home.html", now_usr = now_usr)
   
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods = ["GET", "POST"])
 def login():
   global now_usr
   if request.method == "GET":
-    return render_template("login.html")
+    return render_template("login.html", now_usr = now_usr)
   if request.method == "POST":
-    usr_name = request.form.get("usr_name")
-    usr_password = request.form.get("usr_password")
-    message = "1 {} {}".format(usr_name, usr_password)
-    reslist = inter.login(message)
-    res = reslist[0]
-    if res == "1":
-      now_usr = usr_name
-      print(now_usr)
-      return "1"
+    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+    UserName = request.form.get("UserName")
+    UserPassword = request.form.get("UserPassword")
+    message = "[{}] login -u {} -p {}".format(Timetag, UserName, UserPassword)
+    reslist = inter.fetch(message)
+    print(reslist)
+    res = reslist[0].split(" ")
+    if res[1] == "0":
+      now_usr = UserName
+      return json.dumps({"status": "0", "username": UserName})
     else:
-      return "-1"
+      return json.dumps({"status": "-1", "username": ""})#还未传报错信息
 
-@app.route("/user", methods=["GET", "POST"])
+#@app.route("/add_usr", methods=["GET", "POST"])
+#def add_usr():
+#  global now_usr
+#  if request.method == "GET":
+#    return render_template("add_usr.html")
+#  if request.method == "POST":
+#    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time))
+#    newName = request.form.get("newName")
+#    newPassword = request.form.get("newPassword")
+#    newRealname = request.form.get("newRealname")
+#    newMail = request.form.get("newMail")
+#    newP = request.form.get("newP")
+#    message = "[{}] add_user -c {} -u {} -p {} -n {} -m {} -g {}".format(Timetag, newName, newPassword, newRealname, newMail, newP)
+#    reslist = inter.fetch(message)
+#    res = reslist[1]
+#    if res == "0":
+#      #whatever
+#    else:
+#      #res[2]为报错信息
+@app.route("/user", methods = ["GET", "POST"])
 def user():
   global now_usr
   if now_usr != "":
-    return render_template("user.html", usr_name = now_usr)
+    return render_template("user.html", now_usr = now_usr)
   else:
     flash("Not Logined", "alert")
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
     
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
   global now_usr
   if now_usr == "":
     flash("Not Logined", "alert")
-    return redirect(url_for("home"))
+    return redirect(url_for("home", now_usr = now_usr, msg = "Not logined"))
   else:
     now_usr = ""
     flash("Logout success", "info")
-    return redirect(url_for("home"))
-      
+    return redirect(url_for("home", now_usr = now_usr, msg = "Logout success"))
+
+#@app.route("/profile", methods=["GET", "POST"])
+#def profile():
+#  global now_usr
+#  if now_usr != "":
+#    return render_template("profile.html", user_name = now_user)
+#  else:
+#    flash("Not Logined", "alert")
+#    return redirect(url_for("home"))
 if __name__ == "__main__":
   app.run()

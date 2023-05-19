@@ -1,10 +1,86 @@
-{% extends "base.html" %}
-{% block title %}
-Homepage
-{% endblock %}
+<html lang="zh-CN">
+<head>
+  <title>Login</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <style type="text/css">
+    body {
+      /* 填充背景 */
+      background: url(../static/bg.jpg) no-repeat center center fixed;
+      background-size: cover;
+    }
 
-{% block body %}
-  <h1>Welcome to Polaris_Dane's bookstore. Still under construction.</h1>
-  </br>
-  <h2>Mainly a try for future ticketsystem.</h2>
-{% endblock %}
+    div img {
+      /* 填充式图片，填充整个 div */
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light col-12">
+        <a class="navbar-brand" href="/">Polaris_Dane's TicketSystem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">主页<span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+          <ul class="navbar-nav my-2 my-lg-0">
+            {% if now_usr %}
+            <li class="nav-item">
+              <a class="nav-link" href="/user">{{now_usr}}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">退出</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">登录</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="jumbotron col-5 mt-5">
+        <h1 class="display-5">Welcome to Polaris_Dane's TicketSystem</h1>
+        <p class="lead">A not fully implemented GUI, yet a worthy try</p>
+        <hr class="my-4">
+        <a class="btn btn-primary btn-lg" href="/guide" role="button">了解更多</a>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  {% if msg %}
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="..." class="rounded mr-2" alt="...">
+      <strong class="mr-auto">Bootstrap</strong>
+      <small>11 mins ago</small>
+      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="toast-body">
+      {{msg}}
+    </div>
+  </div>
+  {% endif %}
+
+
+</body>
+</html>
