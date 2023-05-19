@@ -14,7 +14,8 @@ inter = transition("../code")
 
 @app.route("/")
 def home():
-  return render_template("home.html", now_usr = now_usr)
+  msg = request.args.get("msg")
+  return render_template("home.html", now_usr = now_usr, msg = msg)
   
 @app.route("/login", methods = ["GET", "POST"])
 def login():
@@ -57,8 +58,9 @@ def login():
 @app.route("/user", methods = ["GET", "POST"])
 def user():
   global now_usr
+  msg = request.args.get("msg")
   if now_usr != "":
-    return render_template("user.html", now_usr = now_usr)
+    return render_template("user.html", now_usr = now_usr, msg = msg)
   else:
     flash("Not Logined", "alert")
     return redirect(url_for("login"))
@@ -67,12 +69,15 @@ def user():
 def logout():
   global now_usr
   if now_usr == "":
-    flash("Not Logined", "alert")
-    return redirect(url_for("home", now_usr = now_usr, msg = "Not logined"))
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
   else:
+    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+    message = "[{}] logout -u {}".format(Timetag, now_usr)
+    inter.fetch(message)
     now_usr = ""
-    flash("Logout success", "info")
-    return redirect(url_for("home", now_usr = now_usr, msg = "Logout success"))
+    msg = "Logout success"
+    return redirect(url_for("home", msg = msg))
 
 #@app.route("/profile", methods=["GET", "POST"])
 #def profile():

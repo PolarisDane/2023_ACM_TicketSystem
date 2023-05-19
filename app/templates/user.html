@@ -1,15 +1,79 @@
-{% extends "base.html" %}
-{% block title %}
-Login
-{% endblock %}
+<html lang="zh-CN">
+<head>
+  <title>Login</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <style type="text/css">
+    body {
+      /* 填充背景 */
+      background: url(../static/bg.jpg) no-repeat center center fixed;
+      background-size: cover;
+    }
 
-{% block body %}
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for msg in messages %}
-        <h3>{{msg}}</h3>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-<h1>Hello, {{usr_name}}!</h1>
-{% endblock %}
+    div img {
+      /* 填充式图片，填充整个 div */
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light col-12">
+        <a class="navbar-brand" href="/">Polaris_Dane's TicketSystem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">主页<span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+          <ul class="navbar-nav my-2 my-lg-0">
+            {% if now_usr %}
+            <li class="nav-item">
+              <a class="nav-link" href="/user">{{now_usr}}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">退出</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">登录</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+
+
+  </div>
+  <div class="bottom" id="bottom">
+
+  </div>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <div class="alert alert-warning alert-dismissible fade show bottom" role="alert">
+    <strong>Welcome to Polaris_Dane's TicketSystem, {{now_usr}}</strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+</body>
+</html>
