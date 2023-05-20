@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <cstring>
 #include "MyString.h"
 #include "date.h"
@@ -8,10 +8,11 @@
 
 signed main(void) {
   TicketSystem sys;
-  //std::cerr << "fuck" << std::endl;
   //if (!sys.UserSys.admin()) {
   //  //超级管理员！
   //  std::cerr << sys.UserSys.addUser("Polaris_Dane", "Polaris_Dane", "5y57576", "陈一星", "2488721971@qq.com", 10) << std::endl;
+  //  sys.UserSys.loginUser("Polaris_Dane", "5y57576");
+  //  std::cerr << sys.UserSys.addUser("Polaris_Dane", "clorf", "1", "蒋松霖", "clorf@sjtu.edu.cn", 1) << std::endl;
   //}
   std::string opt;
   std::string command;

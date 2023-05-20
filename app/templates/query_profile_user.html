@@ -22,6 +22,11 @@
       position: fixed;
       bottom: 0;
     }
+
+    .footer {
+      position: absolute;
+      bottom: 0px;
+    }
   </style>
 </head>
 <body>
@@ -56,57 +61,45 @@
           </ul>
         </div>
       </nav>
-    </div>
-  </div>
-  <div class="container">
-    <div class="row">
-      <div class="mt-5 col-5">
-        <div class="card bg-light mb-3" style="max-width: 540px;">
-          <div class="h3 text-center card-header">登录</div>
+      <div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <div class="card bg-light mb-3" style="width: 540px;">
+          <div class="h3 text-center card-header">用户信息</div>
           <div class="card-body">
-            <label for="inputUsername">用户名</label>
-            <input type="text" class="form-control" id="UserName" required>
-            <label for="inputPassword" class="py-2">密码</label>
-            <input type="password" class="form-control" id="UserPassword" autofocus required>
-            <button class="btn btn-primary mt-2" id="login">登录</button>
+            <div id="profile">
+              <strong>用户名：</strong>
+              <span id="username">{{username}}</span>
+              <br />
+              <strong>真实姓名：</strong>
+              <span id="userrealname">{{userrealname}}</span>
+              <br />
+              <strong>邮箱：</strong>
+              <span id="usermail">{{usermail}}</span>
+              <br />
+              <strong>权限：</strong>
+              <span id="userp">{{userp}}</span>
+              <br />
+            </div>
           </div>
         </div>
       </div>
+      <div class="col-2">
+
+      </div>
     </div>
+
+
+
   </div>
-
-  <div class="bottom" id="bottom">
-
-  </div>
-
   <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  <script>
-    $("#login").click(function () {
-      let sendData = {
-        "UserName": $("#UserName").val(),
-        "UserPassword": $("#UserPassword").val()
-      }
-      $.ajax({
-        url: "/login",
-        type: "post",
-        data: sendData,
-
-        success: function (returnData) {
-          let data = JSON.parse(returnData)
-          if (data["status"] == "0") {
-            alert("Login success");
-            window.location.replace("/user");
-          }
-          else {
-            alert("Login failed");
-          }
-        }
-      });
-    });
-  </script>
-
 
 </body>
 </html>

@@ -22,6 +22,15 @@
       position: fixed;
       bottom: 0;
     }
+
+    .footer {
+      position: absolute;
+      bottom: 0px;
+    }
+
+    #profile {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -56,57 +65,82 @@
           </ul>
         </div>
       </nav>
-    </div>
-  </div>
-  <div class="container">
-    <div class="row">
-      <div class="mt-5 col-5">
+      <div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
         <div class="card bg-light mb-3" style="max-width: 540px;">
-          <div class="h3 text-center card-header">登录</div>
+          <div class="h3 text-center card-header">查询用户信息</div>
           <div class="card-body">
-            <label for="inputUsername">用户名</label>
-            <input type="text" class="form-control" id="UserName" required>
-            <label for="inputPassword" class="py-2">密码</label>
-            <input type="password" class="form-control" id="UserPassword" autofocus required>
-            <button class="btn btn-primary mt-2" id="login">登录</button>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">请输入要查询信息用户的用户名</span>
+              </div>
+              <input type="text" class="form-control" id="UserName" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <button class="btn btn-primary mt-2" id="submit">查询</button>
+            <br />
+            <div id="profile" class="hide">
+              <strong>用户名：</strong>
+              <span id="username"></span>
+              <br />
+              <strong>真实姓名：</strong>
+              <span id="userrealname"></span>
+              <br />
+              <strong>邮箱：</strong>
+              <span id="usermail"></span>
+              <br />
+              <strong>权限：</strong>
+              <span id="userp"></span>
+              <br />
+            </div>
           </div>
         </div>
       </div>
+      <div class="col-2">
+
+      </div>
     </div>
+
+
+
   </div>
-
-  <div class="bottom" id="bottom">
-
-  </div>
-
   <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
   <script>
-    $("#login").click(function () {
+    $("#submit").click(function () {
+
       let sendData = {
         "UserName": $("#UserName").val(),
-        "UserPassword": $("#UserPassword").val()
       }
       $.ajax({
-        url: "/login",
+        url: "/query_profile_admin",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
           if (data["status"] == "0") {
-            alert("Login success");
-            window.location.replace("/user");
+            $("#username").text(data["username"]);
+            $("#userrealname").text(data["userrealname"]);
+            $("#usermail").text(data["usermail"]);
+            $("#userp").text(data["userp"]);
+            $("#profile").show("slow");
           }
           else {
-            alert("Login failed");
+            alert("User not found");
+            $("#profile").hide("slow");
           }
         }
       });
     });
   </script>
-
 
 </body>
 </html>

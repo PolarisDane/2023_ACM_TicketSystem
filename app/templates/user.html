@@ -79,9 +79,15 @@
                 <img src="../static/user.webp" class="card-img-top" alt="..." />
               </button>
               <div class="dropdown-menu">
-                <button class="dropdown-item" type="button">用户信息查询</button>
-                <button class="dropdown-item" type="button">用户信息修改</button>
-                <button class="dropdown-item" type="button">添加用户</button>
+                {% if now_p == 10 %}
+                <a href="/query_profile_admin" class="dropdown-item">用户信息查询</a>
+                <a href="/modify_profile_admin" class="dropdown-item">用户信息修改</a>
+                <a href="/add_usr" class="dropdown-item">添加用户</a>
+                {% else %}
+                <a href="/query_profile_user" class="dropdown-item">用户信息查询</a>
+                <a href="/modify_profile_user" class="dropdown-item">用户信息修改</a>
+                <a href="/add_usr" class="dropdown-item disabled">添加用户(用户权限不足)</a>
+                {% endif %}
               </div>
             </div>
             <div class="card-body">
@@ -95,11 +101,19 @@
                 <img src="../static/train.webp" class="card-img-top" alt="..." />
               </button>
               <div class="dropdown-menu">
-                <button class="dropdown-item" type="button">车次信息发布</button>
-                <button class="dropdown-item" type="button">车次删除</button>
-                <button class="dropdown-item" type="button">车票发售</button>
-                <button class="dropdown-item" type="button">车票查询</button>
-                <button class="dropdown-item" type="button">单转车票查询</button>
+                {% if now_p == 10 %}
+                <a href="/add_train" class="dropdown-item">车次信息发布</a>
+                <a href="/delete_train" class="dropdown-item">车次删除</a>
+                <a href="/release_train" class="dropdown-item">车票发售</a>
+                <a href="/query_ticket" class="dropdown-item">车票查询</a>
+                <a href="/query_transfer" class="dropdown-item">单转车票查询</a>
+                {% else %}
+                <a href="/add_train" class="dropdown-item disabled">车次信息发布(用户权限不足)</a>
+                <a href="/delete_train" class="dropdown-item disabled">车次删除(用户权限不足)</a>
+                <a href="/release_train" class="dropdown-item disabled">车票发售(用户权限不足)</a>
+                <a href="/query_ticket" class="dropdown-item">车票查询</a>
+                <a href="/query_transfer" class="dropdown-item">单转车票查询</a>
+                {% endif %}
               </div>
             </div>
             <div class="card-body">
@@ -113,9 +127,9 @@
                 <img src="../static/ticket.webp" class="card-img-top" alt="..." />
               </button>
               <div class="dropdown-menu">
-                <button class="dropdown-item" type="button">购票</button>
-                <button class="dropdown-item" type="button">查询记录</button>
-                <button class="dropdown-item" type="button">退票</button>
+                <a href="/add_train" class="dropdown-item">购票</a>
+                <a href="/delete_train" class="dropdown-item">查询记录</a>
+                <a href="/release_train" class="dropdown-item">退票</a>
               </div>
             </div>
             <div class="card-body">

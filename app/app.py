@@ -10,28 +10,38 @@ app.secret_key = "Polaris_Dane"
 
 now_usr = ""
 
+now_p = 0
+
 inter = transition("../code")
 
 @app.route("/")
 def home():
+  global now_usr
+  global now_p
   msg = request.args.get("msg")
   return render_template("home.html", now_usr = now_usr, msg = msg)
   
 @app.route("/login", methods = ["GET", "POST"])
 def login():
   global now_usr
+  global now_p
   if request.method == "GET":
     return render_template("login.html", now_usr = now_usr)
   if request.method == "POST":
-    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     UserName = request.form.get("UserName")
     UserPassword = request.form.get("UserPassword")
+    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] login -u {} -p {}".format(Timetag, UserName, UserPassword)
     reslist = inter.fetch(message)
-    print(reslist)
     res = reslist[0].split(" ")
+    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+    message= "[{}] query_profile -c {} -u {}".format(Timetag, UserName, UserName)
+    reslist = inter.fetch(message)
+    pri = reslist[0].split(" ")
     if res[1] == "0":
       now_usr = UserName
+      now_p = int(pri[4])
+      print(now_p)
       return json.dumps({"status": "0", "username": UserName})
     else:
       return json.dumps({"status": "-1", "username": ""})#还未传报错信息
@@ -58,8 +68,9 @@ def login():
 @app.route("/user", methods = ["GET", "POST"])
 def user():
   global now_usr
+  global now_ps
   if now_usr != "":
-    return render_template("user.html", now_usr = now_usr)
+    return render_template("user.html", now_usr = now_usr, now_p = now_p)
   else:
     flash("Not Logined", "alert")
     return redirect(url_for("login"))
@@ -67,6 +78,7 @@ def user():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
   global now_usr
+  global now_p
   if now_usr == "":
     msg = "Not logined"
     return redirect(url_for("home", msg = msg))
@@ -75,20 +87,50 @@ def logout():
     message = "[{}] logout -u {}".format(Timetag, now_usr)
     inter.fetch(message)
     now_usr = ""
+    now_p = 0
     msg = "Logout success"
     return redirect(url_for("home", msg = msg))
 
-@app.route("/profile", methods=["GET", "POST"])
-def profile():
+@app.route("/query_profile_admin", methods=["GET", "POST"])
+def query_profile_admin():
   global now_usr
-  if request.method == "GET":
-    if now_usr != "":
-      return render_template("profile.html", user_name = now_user)
-    else:
-      flash("Not Logined", "alert")
-      return redirect(url_for("home"))
-  if request.method == "POST":
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p != 10:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_profile_admin.html", now_usr = now_usr)
+    if request.method == "POST":
+      UserName = request.form.get("UserName")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] query_profile -u {} -c {}".format(Timetag, UserName, now_usr)
+      reslist = inter.fetch(message)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1", "username": "", "userrealname": "", "usermail": "", "userp": ""})
+      else:
+        return json.dumps({"status": "0", "username": res[1], "userrealname": res[2], "usermail": res[3], "userp": res[4]})
 
+@app.route("/query_profile_user", methods=["GET", "POST"])
+def query_profile_user():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] query_profile -u {} -c {}".format(Timetag, now_usr, now_usr)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      print(res[1])
+      return render_template("query_profile_user.html", now_usr = now_usr, username = res[1], userrealname = res[2], usermail = res[3], userp = res[4])
 
 if __name__ == "__main__":
   app.run()
