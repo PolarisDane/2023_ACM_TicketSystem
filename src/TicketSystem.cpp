@@ -139,3 +139,14 @@ int TicketSystem::clear() {
   TrainSys.TrainData.clear();
   return 0;
 }
+
+void TicketSystem::exit() {
+  UserTicketCnt.exit();
+  UserTicketData.exit();
+  PendData.exit();
+  UserSys.UserData.exit();
+  UserSys.UserStat.clear();
+  TrainSys.PassData.exit();
+  TrainSys.TicketData.exit();
+  TrainSys.TrainData.exit();
+}

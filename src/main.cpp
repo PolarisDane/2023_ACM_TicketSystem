@@ -1,13 +1,20 @@
 #include <iostream>
 #include <cstring>
+#include <csignal>
 #include "MyString.h"
 #include "date.h"
 #include "exceptions.h"
 #include "Parser.h"
 #include "TicketSystem.h"
 
+TicketSystem sys;
+
+void signal(int signum) {
+  sys.exit();
+}
+
 signed main(void) {
-  TicketSystem sys;
+  std::signal(SIGINT, signal);
   //if (!sys.UserSys.admin()) {
   //  //超级管理员！
   //  std::cerr << sys.UserSys.addUser("Polaris_Dane", "Polaris_Dane", "5y57576", "陈一星", "2488721971@qq.com", 10) << std::endl;

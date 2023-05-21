@@ -1,5 +1,3 @@
-# TO-DO LIST:
-# 1.响应式布局！！！
 from flask import Flask, render_template, request, flash, url_for, redirect
 from transitioner import transition
 import time
@@ -13,13 +11,6 @@ now_usr = ""
 now_p = 0
 
 inter = transition("../code")
-
-@app.route("/save")
-def save():
-  Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
-  message = "[{}] exit".format(Timetag)
-  inter.fetch(message)
-  return redirect(url_for("home"))
 
 @app.route("/")
 def home():
@@ -40,7 +31,7 @@ def login():
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] login -u {} -p {}".format(Timetag, UserName, UserPassword)
     reslist = inter.fetch(message)
-    print(reslist)
+    #print(reslist)
     res = reslist[0].split(" ")
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] query_profile -c {} -u {}".format(Timetag, UserName, UserName)
@@ -74,9 +65,9 @@ def add_user():
       newMail = request.form.get("newMail")
       newP = request.form.get("newP")
       message = "[{}] add_user -c {} -u {} -p {} -n {} -m {} -g {}".format(Timetag, now_usr, newName, newPassword, newRealname, newMail, newP)
-      print(message)
+      #print(message)
       reslist = inter.fetch(message)
-      print(reslist)
+      #print(reslist)
       res = reslist[0].split(" ")
       if res[1] == "0":
         return json.dumps({"status": "0"})
@@ -145,9 +136,9 @@ def query_profile_user():
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
       message = "[{}] query_profile -u {} -c {}".format(Timetag, now_usr, now_usr)
       reslist = inter.fetch(message)
-      print(reslist)
+      #print(reslist)
       res = reslist[0].split(" ")
-      print(res[1])
+      #print(res[1])
       return render_template("query_profile_user.html", now_usr = now_usr, username = res[1], userrealname = res[2], usermail = res[3], userp = res[4])
 
 @app.route("/modify_profile_admin", methods = ["GET", "POST"])

@@ -226,6 +226,17 @@ public:
     value_file.close();
   }
 
+  void exit() {
+    index_file.seekp(0);
+    index_file.write(reinterpret_cast<char*>(&nodeCnt), sizeof(int));
+    index_file.write(reinterpret_cast<char*>(&valCnt), sizeof(int));
+    index_file.write(reinterpret_cast<char*>(&siz), sizeof(int));
+    index_file.write(reinterpret_cast<char*>(&root_index), sizeof(int));
+    Cache.dump();
+    index_file.close();
+    value_file.close();
+  }
+
   bool empty() {
     return siz == 0;
   }

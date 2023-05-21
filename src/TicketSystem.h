@@ -66,6 +66,7 @@ public:
   int query_order(const username& UserName);
   int refund_ticket(const username& UserName, const int& pos);
   int clear();
+  void exit();
 };
 
 
