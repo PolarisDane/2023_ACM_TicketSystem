@@ -14,6 +14,13 @@ now_p = 0
 
 inter = transition("../code")
 
+@app.route("/save")
+def save():
+  Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+  message = "[{}] exit".format(Timetag)
+  inter.fetch(message)
+  return redirect(url_for("home"))
+
 @app.route("/")
 def home():
   global now_usr
@@ -33,9 +40,10 @@ def login():
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] login -u {} -p {}".format(Timetag, UserName, UserPassword)
     reslist = inter.fetch(message)
+    print(reslist)
     res = reslist[0].split(" ")
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
-    message= "[{}] query_profile -c {} -u {}".format(Timetag, UserName, UserName)
+    message = "[{}] query_profile -c {} -u {}".format(Timetag, UserName, UserName)
     reslist = inter.fetch(message)
     pri = reslist[0].split(" ")
     if res[1] == "0":
@@ -45,26 +53,36 @@ def login():
       return json.dumps({"status": "0", "username": UserName})
     else:
       return json.dumps({"status": "-1", "username": ""})#还未传报错信息
+@app.route("/add_user", methods=["GET", "POST"])
+def add_user():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p < 9:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("add_user.html", now_usr = now_usr, now_p = now_p)
+    if request.method == "POST":
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      newName = request.form.get("newName")
+      newPassword = request.form.get("newPassword")
+      newRealname = request.form.get("newRealname")
+      newMail = request.form.get("newMail")
+      newP = request.form.get("newP")
+      message = "[{}] add_user -c {} -u {} -p {} -n {} -m {} -g {}".format(Timetag, now_usr, newName, newPassword, newRealname, newMail, newP)
+      print(message)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "0":
+        return json.dumps({"status": "0"})
+      else:
+        return json.dumps({"status": "-1"})
 
-#@app.route("/add_usr", methods=["GET", "POST"])
-#def add_usr():
-#  global now_usr
-#  if request.method == "GET":
-#    return render_template("add_usr.html")
-#  if request.method == "POST":
-#    Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time))
-#    newName = request.form.get("newName")
-#    newPassword = request.form.get("newPassword")
-#    newRealname = request.form.get("newRealname")
-#    newMail = request.form.get("newMail")
-#    newP = request.form.get("newP")
-#    message = "[{}] add_user -c {} -u {} -p {} -n {} -m {} -g {}".format(Timetag, newName, newPassword, newRealname, newMail, newP)
-#    reslist = inter.fetch(message)
-#    res = reslist[1]
-#    if res == "0":
-#      #whatever
-#    else:
-#      #res[2]为报错信息
 @app.route("/user", methods = ["GET", "POST"])
 def user():
   global now_usr

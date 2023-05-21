@@ -74,25 +74,26 @@
         <br />
         <br />
         <div class="card bg-light mb-3" style="width: 540px;">
-          <div class="h3 text-center card-header">查询用户信息</div>
+          <div class="h3 text-center card-header">添加新用户</div>
           <div class="card-body">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="basic-addon1">请输入要修改信息用户的用户名</span>
-            </div>
-            <input type="text" class="form-control" id="UserName" autofocus>
+            <label for="inputPassword">用户名</label>
+            <input type="text" class="form-control" id="newName" required autofocus>
             <label for="inputPassword" class="py-2">密码</label>
-            <input type="text" class="form-control" id="newPassword" autofocus>
+            <input type="text" class="form-control" id="newPassword" required autofocus>
             <label for="inputRealname" class="py-2">名字</label>
-            <input type="text" class="form-control" id="newRealname" autofocus>
+            <input type="text" class="form-control" id="newRealname" required autofocus>
             <label for="inputP" class="py-2">邮箱</label>
-            <input type="text" class="form-control" id="newMail" autofocus>
+            <input type="text" class="form-control" id="newMail" required autofocus>
             <label for="inputP" class="py-2">权限</label>
             <select class="custom-select" id="newP">
-              <option value="-1" selected>Choose...</option>
-              <option value="1">用户</option>
+              <option value="1" selected>用户</option>
+              {% if now_p == 10 %}
               <option value="9">管理员</option>
+              {% else %}
+              <option value="9">管理员(仅超级管理员可添加)</option>
+              {% endif %}
             </select>
-            <button class="btn btn-primary mt-2" id="submit">修改</button>
+            <button class="btn btn-primary mt-2" id="submit">确认</button>
             <br />
           </div>
         </div>
@@ -113,24 +114,24 @@
     $("#submit").click(function () {
 
       let sendData = {
-        "UserName": $("#UserName").val(),
+        "newName": $("#newName").val(),
         "newPassword": $("#newPassword").val(),
         "newRealname": $("#newRealname").val(),
         "newMail": $("#newMail").val(),
         "newP": $("#newP").val()
       }
       $.ajax({
-        url: "/modify_profile_admin",
+        url: "/add_user",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
           if (data["status"] == "0") {
-            alert("Modify profile success");
+            alert("Add user success");
           }
           else {
-            alert("Modify profile fail");
+            alert("Add user fail");
           }
         }
       });
