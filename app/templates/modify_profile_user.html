@@ -1,6 +1,6 @@
 <html lang="zh-CN">
 <head>
-  <title>用户查询</title>
+  <title>更改用户信息</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
@@ -26,6 +26,10 @@
     .footer {
       position: absolute;
       bottom: 0px;
+    }
+
+    #profile {
+      display: none;
     }
   </style>
 </head>
@@ -70,22 +74,20 @@
         <br />
         <br />
         <div class="card bg-light mb-3" style="width: 540px;">
-          <div class="h3 text-center card-header">用户信息</div>
+          <div class="h3 text-center card-header">查询用户信息</div>
           <div class="card-body">
-            <div id="profile">
-              <strong>用户名：</strong>
-              <span id="username">{{username}}</span>
-              <br />
-              <strong>真实姓名：</strong>
-              <span id="userrealname">{{userrealname}}</span>
-              <br />
-              <strong>邮箱：</strong>
-              <span id="usermail">{{usermail}}</span>
-              <br />
-              <strong>权限：</strong>
-              <span id="userp">{{userp}}</span>
-              <br />
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon1">请输入要修改信息用户的用户名</span>
             </div>
+            <input type="text" class="form-control" id="UserName" value={{now_usr}} readonly autofocus>
+            <label for="inputPassword" class="py-2">密码</label>
+            <input type="text" class="form-control" id="newPassword" autofocus>
+            <label for="inputRealname" class="py-2">名字</label>
+            <input type="text" class="form-control" id="newRealname" autofocus>
+            <label for="inputP" class="py-2">邮箱</label>
+            <input type="text" class="form-control" id="newMail" autofocus>
+            <button class="btn btn-primary mt-2" id="submit">修改</button>
+            <br />
           </div>
         </div>
       </div>
@@ -100,6 +102,32 @@
   <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <script>
+    $("#submit").click(function () {
+
+      let sendData = {
+        "newPassword": $("#newPassword").val(),
+        "newRealname": $("#newRealname").val(),
+        "newMail": $("#newMail").val(),
+      }
+      $.ajax({
+        url: "/modify_profile_user",
+        type: "post",
+        data: sendData,
+
+        success: function (returnData) {
+          let data = JSON.parse(returnData)
+          if (data["status"] == "0") {
+            alert("Modify profile success");
+          }
+          else {
+            alert("Modify profile failed");
+          }
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>

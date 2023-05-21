@@ -19,7 +19,7 @@ void ReadLine(const std::string& str,std::string* buf) {
       pos = i + 1;
     }
   }
-  buf[++cnt] = str.substr(pos);
+  if (pos < str.length()) buf[++cnt] = str.substr(pos);
   buf[0] = std::to_string(cnt);
 }
 
