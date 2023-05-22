@@ -1,3 +1,5 @@
+#具体报错信息未添加
+
 from flask import Flask, render_template, request, flash, url_for, redirect
 from transitioner import transition
 import time
@@ -46,6 +48,7 @@ def login():
       return json.dumps({"status": "-1", "username": ""})#还未传报错信息
 @app.route("/add_user", methods=["GET", "POST"])
 def add_user():
+  #密码确认保密未进行
   global now_usr
   global now_p
   if now_usr == "":
@@ -143,6 +146,7 @@ def query_profile_user():
 
 @app.route("/modify_profile_admin", methods = ["GET", "POST"])
 def modify_profile_admin():
+  #密码确认保密未进行
   global now_usr
   global now_p
   if now_usr == "":
@@ -181,6 +185,7 @@ def modify_profile_admin():
 
 @app.route("/modify_profile_user", methods = ["GET", "POST"])
 def modify_profile_user():
+  #密码确认保密未进行
   global now_usr
   global now_p
   if now_usr == "":
@@ -210,5 +215,42 @@ def modify_profile_user():
       else:
         return json.dumps({"status": "0"})
 
+@app.route("/add_train", methods = ["GET", "POST"])
+def add_train():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p < 9:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_ticket.html", now_usr = now_usr)
+    if request.method == "POST":
+      newID = request.form.get("newID")
+      newstationNum = request.form.get("newstationNum")
+      newseatNum = request.form.get("newseatNum")
+      stations = request.form.get("stations")
+      price = request.form.get("price")
+      new_st_time = request.form.get("new_st_time")
+      new_trav_time = request.form.get("new_trav_time")
+      new_stop_time = request.form.get("new_stop_time")
+      new_st_Date = request.form.get("new_st_Date")
+      new_ed_Date = request.form.get("new_ed_Date")
+      newType = request.form.get("newType")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] add_train -i {} -n {} -m {} -s {} -p {} -x {} -t {} -o {} -d {} -y {}".format(Timetag, newID, newstationNum, newseatNum, stations, price, new_st_time, new_trav_time, new_stop_time, new_st_Date, new_ed_Date, newType)
+      reslist = inter.fetch(message)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        return json.dumps({"status": "0"})
+
+
+
 if __name__ == "__main__":
+  #添加超级管理员操作未完成
   app.run()

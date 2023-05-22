@@ -1,0 +1,219 @@
+<html lang="zh-CN">
+<head>
+  <title>车次信息发布</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <style type="text/css">
+    body {
+      /* 填充背景 */
+      background: url(../static/bg.jpg) no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    div img {
+      /* 填充式图片，填充整个 div */
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0px;
+    }
+
+    #profile {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light col-12">
+        <a class="navbar-brand" href="/">Polaris_Dane's TicketSystem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">主页<span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+          <ul class="navbar-nav my-2 my-lg-0">
+            {% if now_usr %}
+            <li class="nav-item">
+              <a class="nav-link" href="/user">{{now_usr}}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">退出</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">登录</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+      <div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <div class="card bg-light mb-3" style="max-width: 540px;">
+          <div class="h3 text-center card-header">车次信息发布</div>
+          <div class="card-body">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">请输入要发布车次的列车名</span>
+              </div>
+              <input type="text" class="form-control" id="newID" aria-label="newID" aria-describedby="basic-addon1">
+            </div>
+            <label for="inputPassword">车座数</label>
+            <input type="text" class="form-control" id="newseatNum" autofocus>
+            <label for="inputRealname" class="py-2">列车类型</label>
+            <input type="text" class="form-control" id="newType" autofocus>
+            <label for="inputP" class="py-2">列车每日出发时间(请以"小时:分钟"格式输入)</label>
+            <input type="text" class="form-control" id="newstartTime" autofocus>
+            <br />
+          </div>
+        </div>
+      </div>
+      <div class="col-1">
+
+      </div>
+      <div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <div class="card bg-light mb-3" style="width: 540px; overflow: scroll;">
+          <div class="h3 text-center card-header">车次信息发布</div>
+          <div class="card-body">
+            <button class="btn btn-primary mt-2" id="more">+</button>
+            <button class="btn btn-primary mt-2" id="less">-</button>
+
+            <div class="mb-3 firstStation">
+              <label for="inputP" class="py-2">始发站名</label>
+              <input type="text" class="form-control" id="station" required autofocus>
+              <label for="inputP" class="py-2">到下一站的票价</label>
+              <input type="text" class="form-control" id="price" required autofocus>
+              <label for="inputP" class="py-2">到下一站所需要的时间</label>
+              <input type="text" class="form-control" id="trav_time" required autofocus>
+            </div>
+
+            <div class="mb-3 newStation">
+              <label for="inputP" class="py-2">车站名</label>
+              <input type="text" class="form-control" id="station" required autofocus>
+              <label for="inputP" class="py-2">在当前站停留时间</label>
+              <input type="text" class="form-control" id="stop_time" required autofocus>
+              <label for="inputP" class="py-2">到下一站的票价</label>
+              <input type="text" class="form-control" id="price" required autofocus>
+              <label for="inputP" class="py-2">到下一站所需要的时间</label>
+              <input type="text" class="form-control" id="trav_time" required autofocus>
+            </div>
+
+            <div class="mb-3 lastStation">
+              <label for="inputP" class="py-2">终点站名</label>
+              <input type="text" class="form-control" id="station" required autofocus>
+            </div>
+
+            <button class="btn btn-primary mt-2" id="submit">发布</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <script>
+    var stationNum = 0;
+    $("#more").click(function () {
+      if (stationNum >= 100) {
+        alert("Exceeding maximum station number");
+        return;
+      }
+      stationNum++;
+      let addHTML = ""
+    });
+    $("#less").click(function () {
+      if (stationNum <= 0) {
+        alert("No station added");
+        return;
+      }
+      stationNum--;
+
+    });
+    $("#submit").click(function () {
+
+      let stations = new Array();
+      let price = new Array();
+      let new_trav_time = new Array();
+      let new_stop_time = new Array();
+
+      $(".newStation").each(function () {
+        stations.push(this.station);
+        price.push(this.price);
+        new_trav_time.push(this.trav_time);
+        new_stop_time.push(this.stop_time);
+      });
+
+      stations.join("|");
+      price.join("|");
+      new_trav_time.join("|");
+      new_stop_time.join("|");
+
+      let sendData = {
+        "newID": ("#newID").val(),
+        "newstationNum": ("#newstationNum").val(),
+        "newseatNum": ("#newseatNum").val(),
+        "newType": ("#newType").val(),
+        "stations": stations,
+        "price": price,
+        "new_st_time": ("#new_st_time").val(),
+        "new_trav_time": new_trav_time,
+        "new_stop_time": new_stop_time,
+        "new_st_Date": ("#new_st_Date").val(),
+        "new_ed_Date": ("#new_ed_Date").val()
+      }
+      $.ajax({
+        url: "/add_train",
+        type: "post",
+        data: sendData,
+
+        success: function (returnData) {
+          let data = JSON.parse(returnData)
+          if (data["status"] == "0") {
+            alert("Add train success");
+          }
+          else {
+            alert("Add train fail");
+          }
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

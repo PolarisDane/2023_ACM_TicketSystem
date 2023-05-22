@@ -1,18 +1,18 @@
 <html lang="zh-CN">
 <head>
-  <title>æ›´æ”¹ç”¨æˆ·ä¿¡æ¯</title>
+  <title>³µÆ±²éÑ¯</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
   <style type="text/css">
     body {
-      /* å¡«å……èƒŒæ™¯ */
+      /* Ìî³ä±³¾° */
       background: url(../static/bg.jpg) no-repeat center center fixed;
       background-size: cover;
     }
 
     div img {
-      /* å¡«å……å¼å›¾ç‰‡ï¼Œå¡«å……æ•´ä¸ª div */
+      /* Ìî³äÊ½Í¼Æ¬£¬Ìî³äÕû¸ö div */
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -46,7 +46,7 @@
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li class="nav-item active">
-              <a class="nav-link" href="/">ä¸»é¡µ<span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="/">Ö÷Ò³<span class="sr-only">(current)</span></a>
             </li>
           </ul>
           <ul class="navbar-nav my-2 my-lg-0">
@@ -55,11 +55,11 @@
               <a class="nav-link" href="/user">{{now_usr}}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/logout">é€€å‡º</a>
+              <a class="nav-link" href="/logout">ÍË³ö</a>
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="nav-link" href="/login">ç™»å½•</a>
+              <a class="nav-link" href="/login">µÇÂ¼</a>
             </li>
             {% endif %}
           </ul>
@@ -74,28 +74,30 @@
         <br />
         <br />
         <div class="card bg-light mb-3" style="max-width: 540px;">
-          <div class="h3 text-center card-header">ä¿®æ”¹ç”¨æˆ·ä¿¡æ¯</div>
+          <div class="h3 text-center card-header">²éÑ¯µ¥³Ì³µÆ±</div>
           <div class="card-body">
             <div class="input-group mb-3">
               <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">è¯·è¾“å…¥è¦ä¿®æ”¹ä¿¡æ¯ç”¨æˆ·çš„ç”¨æˆ·å</span>
+                <span class="input-group-text" id="basic-addon1">ÇëÊäÈëÒª²éÑ¯ĞÅÏ¢ÓÃ»§µÄÓÃ»§Ãû</span>
               </div>
               <input type="text" class="form-control" id="UserName" aria-label="Username" aria-describedby="basic-addon1">
             </div>
-            <label for="inputPassword">å¯†ç </label>
-            <input type="text" class="form-control" id="newPassword" autofocus>
-            <label for="inputRealname" class="py-2">åå­—</label>
-            <input type="text" class="form-control" id="newRealname" autofocus>
-            <label for="inputP" class="py-2">é‚®ç®±</label>
-            <input type="text" class="form-control" id="newMail" autofocus>
-            <label for="inputP" class="py-2">æƒé™</label>
-            <select class="custom-select" id="newP">
-              <option value="-1" selected>Choose...</option>
-              <option value="1">ç”¨æˆ·</option>
-              <option value="9">ç®¡ç†å‘˜</option>
-            </select>
-            <button class="btn btn-primary mt-2" id="submit">ä¿®æ”¹</button>
+            <button class="btn btn-primary mt-2" id="submit">²éÑ¯</button>
             <br />
+            <div id="profile" class="hide">
+              <strong>ÓÃ»§Ãû£º</strong>
+              <span id="username"></span>
+              <br />
+              <strong>ÕæÊµĞÕÃû£º</strong>
+              <span id="userrealname"></span>
+              <br />
+              <strong>ÓÊÏä£º</strong>
+              <span id="usermail"></span>
+              <br />
+              <strong>È¨ÏŞ£º</strong>
+              <span id="userp"></span>
+              <br />
+            </div>
           </div>
         </div>
       </div>
@@ -115,24 +117,25 @@
     $("#submit").click(function () {
 
       let sendData = {
-        "UserName": $("#UserName").val(),
-        "newPassword": $("#newPassword").val(),
-        "newRealname": $("#newRealname").val(),
-        "newMail": $("#newMail").val(),
-        "newP": $("#newP").val()
+        "UserName": $("#UserName").val()
       }
       $.ajax({
-        url: "/modify_profile_admin",
+        url: "/query_profile_admin",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
           if (data["status"] == "0") {
-            alert("Modify profile success");
+            $("#username").text(data["username"]);
+            $("#userrealname").text(data["userrealname"]);
+            $("#usermail").text(data["usermail"]);
+            $("#userp").text(data["userp"]);
+            $("#profile").show("slow");
           }
           else {
-            alert("Modify profile fail");
+            alert("Query profile fail");
+            $("#profile").hide("slow");
           }
         }
       });
