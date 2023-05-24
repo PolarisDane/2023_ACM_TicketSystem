@@ -8,5 +8,11 @@
 
 4.使用 js append 来实现元素添加
 
-5."." 表示寻找 class, "#" 表示寻找 id,
+5."." 表示寻找 class, "#" 表示寻找 id
   在 jquery 中使用类似 $("#") 语法再加其成员函数可以在某些事件之后去访问这些 class 对象
+  再添加 last, prev, next 等可以访问附近元素或定向访问，实现尾部添加删除等操作
+  即 append 和 remove 等操作，还有 insertbefore 操作
+
+6.jquery 调用父对象使用 parent() 方法
+  注意对于选取单个元素父对象时，this不能直接代替选择器
+  必须写成 $(this) 通过选择器去访问，否则无效

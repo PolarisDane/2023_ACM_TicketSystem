@@ -227,7 +227,7 @@ def add_train():
     return redirect(url_for("home", msg = msg))
   else:
     if request.method == "GET":
-      return render_template("query_ticket.html", now_usr = now_usr)
+      return render_template("add_train.html", now_usr = now_usr)
     if request.method == "POST":
       newID = request.form.get("newID")
       newstationNum = request.form.get("newstationNum")

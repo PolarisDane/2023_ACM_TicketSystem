@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <style type="text/css">
     body {
       /* 填充背景 */
@@ -103,13 +104,15 @@
         <br />
         <br />
         <br />
-        <div class="card bg-light mb-3" style="width: 540px; overflow: scroll;">
+        <div class="card bg-light mb-3" style="width: 540px;">
           <div class="h3 text-center card-header">车次信息发布</div>
+
           <div class="card-body">
             <button class="btn btn-primary mt-2" id="more">+</button>
             <button class="btn btn-primary mt-2" id="less">-</button>
 
-            <div class="mb-3 firstStation">
+            <button class="btn border stationtoggle">hide</button>
+            <div class="mb-3 firstStation py-2">
               <label for="inputP" class="py-2">始发站名</label>
               <input type="text" class="form-control" id="station" required autofocus>
               <label for="inputP" class="py-2">到下一站的票价</label>
@@ -118,7 +121,8 @@
               <input type="text" class="form-control" id="trav_time" required autofocus>
             </div>
 
-            <div class="mb-3 newStation">
+            <button class="btn border stationtoggle">hide</button>
+            <div class="mb-3 newStation py-2">
               <label for="inputP" class="py-2">车站名</label>
               <input type="text" class="form-control" id="station" required autofocus>
               <label for="inputP" class="py-2">在当前站停留时间</label>
@@ -129,7 +133,8 @@
               <input type="text" class="form-control" id="trav_time" required autofocus>
             </div>
 
-            <div class="mb-3 lastStation">
+            <button class="btn border stationtoggle">hide</button>
+            <div class="mb-3 lastStation py-2">
               <label for="inputP" class="py-2">终点站名</label>
               <input type="text" class="form-control" id="station" required autofocus>
             </div>
@@ -139,6 +144,7 @@
         </div>
       </div>
     </div>
+
 
 
 
@@ -155,64 +161,81 @@
         return;
       }
       stationNum++;
-      let addHTML = ""
-    });
-    $("#less").click(function () {
-      if (stationNum <= 0) {
-        alert("No station added");
-        return;
-      }
-      stationNum--;
-
-    });
-    $("#submit").click(function () {
-
-      let stations = new Array();
-      let price = new Array();
-      let new_trav_time = new Array();
-      let new_stop_time = new Array();
-
-      $(".newStation").each(function () {
-        stations.push(this.station);
-        price.push(this.price);
-        new_trav_time.push(this.trav_time);
-        new_stop_time.push(this.stop_time);
-      });
-
-      stations.join("|");
-      price.join("|");
-      new_trav_time.join("|");
-      new_stop_time.join("|");
-
-      let sendData = {
-        "newID": ("#newID").val(),
-        "newstationNum": ("#newstationNum").val(),
-        "newseatNum": ("#newseatNum").val(),
-        "newType": ("#newType").val(),
-        "stations": stations,
-        "price": price,
-        "new_st_time": ("#new_st_time").val(),
-        "new_trav_time": new_trav_time,
-        "new_stop_time": new_stop_time,
-        "new_st_Date": ("#new_st_Date").val(),
-        "new_ed_Date": ("#new_ed_Date").val()
-      }
-      $.ajax({
-        url: "/add_train",
-        type: "post",
-        data: sendData,
-
-        success: function (returnData) {
-          let data = JSON.parse(returnData)
-          if (data["status"] == "0") {
-            alert("Add train success");
-          }
-          else {
-            alert("Add train fail");
-          }
+      //这里按钮有问题
+      let addHTML = '\
+                    <button class="btn border stationtoggle">hide</button>\
+                    <div class="mb-3 newStation py-2">\
+                      <label for="inputP" class= "py-2">车站名</label>\
+                      <input type="text" class="form-control" id="station" required autofocus>\
+                      <label for="inputP" class="py-2">在当前站停留时间</label>\
+                      <input type="text" class="form-control" id="stop_time" required autofocus>\
+                      <label for="inputP" class="py-2">到下一站的票价</label>\
+                      <input type="text" class="form-control" id="price" required autofocus>\
+                      <label for="inputP" class="py-2">到下一站所需要的时间</label>\
+                      <input type="text" class="form-control" id="trav_time" required autofocus>\
+                    </div>\
+      ';
+      $(".newstation").last().after(addHTML);
+     });
+      $("#less").click(function () {
+        if (stationNum <= 0) {
+          alert("No station added");
+          return;
         }
+        stationNum--;
+        $(".newstation").last().remove();
       });
-    });
+      $(".stationtoggle").click(function () {
+        $(this).next().toggle("slow");
+      });
+      $("#submit").click(function () {
+
+        let stations = new Array();
+        let price = new Array();
+        let new_trav_time = new Array();
+        let new_stop_time = new Array();
+
+        $(".newStation").each(function () {
+          stations.push(this.station);
+          price.push(this.price);
+          new_trav_time.push(this.trav_time);
+          new_stop_time.push(this.stop_time);
+        });
+
+        stations.join("|");
+        price.join("|");
+        new_trav_time.join("|");
+        new_stop_time.join("|");
+
+        let sendData = {
+          "newID": ("#newID").val(),
+          "newstationNum": ("#newstationNum").val(),
+          "newseatNum": ("#newseatNum").val(),
+          "newType": ("#newType").val(),
+          "stations": stations,
+          "price": price,
+          "new_st_time": ("#new_st_time").val(),
+          "new_trav_time": new_trav_time,
+          "new_stop_time": new_stop_time,
+          "new_st_Date": ("#new_st_Date").val(),
+          "new_ed_Date": ("#new_ed_Date").val()
+        }
+        $.ajax({
+                  url: "/add_train",
+          type: "post",
+          data: sendData,
+
+          success: function (returnData) {
+                  let data = JSON.parse(returnData)
+            if (data["status"] == "0") {
+                  alert("Add train success");
+            }
+            else {
+                  alert("Add train fail");
+            }
+          }
+        });
+      });
   </script>
 
 </body>
