@@ -29,7 +29,7 @@
       bottom: 0px;
     }
 
-    #profile {
+    .concise-info {
       display: none;
     }
   </style>
@@ -88,7 +88,10 @@
             <label for="inputRealname" class="py-2">列车类型</label>
             <input type="text" class="form-control" id="newType" autofocus>
             <label for="inputP" class="py-2">列车每日出发时间(请以"小时:分钟"格式输入)</label>
-            <input type="text" class="form-control" id="newstartTime" autofocus>
+            <input type="text" class="form-control" id="new_st_time" autofocus>
+            <label for="inputP" class="py-2">列车运行时间区间(请以"月份-日期|月份-日期"格式输入)</label>
+            <input type="text" class="form-control" id="newsaleDate" autofocus>
+            <!--parser目前无报错-->
             <br />
           </div>
         </div>
@@ -110,34 +113,26 @@
           <div class="card-body">
             <button class="btn btn-primary mt-2" id="more">+</button>
             <button class="btn btn-primary mt-2" id="less">-</button>
+            <br />
+            <br />
 
-            <button class="btn border stationtoggle">hide</button>
-            <div class="mb-3 firstStation py-2">
-              <label for="inputP" class="py-2">始发站名</label>
-              <input type="text" class="form-control" id="station" required autofocus>
-              <label for="inputP" class="py-2">到下一站的票价</label>
-              <input type="text" class="form-control" id="price" required autofocus>
-              <label for="inputP" class="py-2">到下一站所需要的时间</label>
-              <input type="text" class="form-control" id="trav_time" required autofocus>
-            </div>
-
-            <button class="btn border stationtoggle">hide</button>
+            <button class="btn border stationtoggle"><i class="bi bi-arrows-angle-contract"></i></button>
             <div class="mb-3 newStation py-2">
-              <label for="inputP" class="py-2">车站名</label>
-              <input type="text" class="form-control" id="station" required autofocus>
-              <label for="inputP" class="py-2">在当前站停留时间</label>
-              <input type="text" class="form-control" id="stop_time" required autofocus>
+              <label for="inputP" class="py-2">始发站名</label>
+              <input type="text" class="form-control station" required autofocus>
               <label for="inputP" class="py-2">到下一站的票价</label>
-              <input type="text" class="form-control" id="price" required autofocus>
+              <input type="text" class="form-control price" required autofocus>
               <label for="inputP" class="py-2">到下一站所需要的时间</label>
-              <input type="text" class="form-control" id="trav_time" required autofocus>
+              <input type="text" class="form-control trav_time" required autofocus>
             </div>
+            <div class="mb-3 concise-info py-2"></div>
 
-            <button class="btn border stationtoggle">hide</button>
+            <button class="btn border stationtoggle"><i class="bi bi-arrows-angle-contract"></i></button>
             <div class="mb-3 lastStation py-2">
               <label for="inputP" class="py-2">终点站名</label>
-              <input type="text" class="form-control" id="station" required autofocus>
+              <input type="text" class="form-control station" required autofocus>
             </div>
+            <div class="mb-3 concise-info py-2"></div>
 
             <button class="btn btn-primary mt-2" id="submit">发布</button>
           </div>
@@ -154,88 +149,123 @@
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
   <script>
-    var stationNum = 0;
+    var stationNum = 2;
     $("#more").click(function () {
       if (stationNum >= 100) {
         alert("Exceeding maximum station number");
         return;
       }
       stationNum++;
-      //这里按钮有问题
-      let addHTML = '\
-                    <button class="btn border stationtoggle">hide</button>\
-                    <div class="mb-3 newStation py-2">\
-                      <label for="inputP" class= "py-2">车站名</label>\
-                      <input type="text" class="form-control" id="station" required autofocus>\
-                      <label for="inputP" class="py-2">在当前站停留时间</label>\
-                      <input type="text" class="form-control" id="stop_time" required autofocus>\
-                      <label for="inputP" class="py-2">到下一站的票价</label>\
-                      <input type="text" class="form-control" id="price" required autofocus>\
-                      <label for="inputP" class="py-2">到下一站所需要的时间</label>\
-                      <input type="text" class="form-control" id="trav_time" required autofocus>\
-                    </div>\
-      ';
-      $(".newstation").last().after(addHTML);
-     });
-      $("#less").click(function () {
-        if (stationNum <= 0) {
-          alert("No station added");
-          return;
-        }
-        stationNum--;
-        $(".newstation").last().remove();
-      });
-      $(".stationtoggle").click(function () {
+
+      let addHTML = `
+              <button class="btn border stationtoggle"><i class="bi bi-arrows-angle-contract"></i></button>
+              <div class="mb-3 newStation py-2">
+                <label for="inputP" class="py-2">车站名</label>
+                <input type="text" class="form-control station" required autofocus>
+                <label for="inputP" class="py-2">在当前站停留时间</label>
+                <input type="text" class="form-control stop_time" required autofocus>
+                <label for="inputP" class="py-2">到下一站的票价</label>
+                <input type="text" class="form-control price" required autofocus>
+                <label for="inputP" class="py-2">到下一站所需要的时间</label>
+                <input type="text" class="form-control trav_time" required autofocus>
+              </div>
+              <div class="mb-3 concise-info py-2"></div>
+        `;
+      $(".newStation").last().next().after(addHTML);
+      $(".newStation").last().prev().click(function () {
         $(this).next().toggle("slow");
-      });
-      $("#submit").click(function () {
-
-        let stations = new Array();
-        let price = new Array();
-        let new_trav_time = new Array();
-        let new_stop_time = new Array();
-
-        $(".newStation").each(function () {
-          stations.push(this.station);
-          price.push(this.price);
-          new_trav_time.push(this.trav_time);
-          new_stop_time.push(this.stop_time);
-        });
-
-        stations.join("|");
-        price.join("|");
-        new_trav_time.join("|");
-        new_stop_time.join("|");
-
-        let sendData = {
-          "newID": ("#newID").val(),
-          "newstationNum": ("#newstationNum").val(),
-          "newseatNum": ("#newseatNum").val(),
-          "newType": ("#newType").val(),
-          "stations": stations,
-          "price": price,
-          "new_st_time": ("#new_st_time").val(),
-          "new_trav_time": new_trav_time,
-          "new_stop_time": new_stop_time,
-          "new_st_Date": ("#new_st_Date").val(),
-          "new_ed_Date": ("#new_ed_Date").val()
+        var s = $(this).next().find(".station").val();
+        $(this).next().next().text(s);
+        $(this).next().next().toggle("slow");
+        if ($(this).children().hasClass("bi-arrows-angle-contract")) {
+          $(this).children().removeClass("bi-arrows-angle-contract");
+          $(this).children().addClass("bi-arrows-angle-expand");
         }
-        $.ajax({
-                  url: "/add_train",
-          type: "post",
-          data: sendData,
-
-          success: function (returnData) {
-                  let data = JSON.parse(returnData)
-            if (data["status"] == "0") {
-                  alert("Add train success");
-            }
-            else {
-                  alert("Add train fail");
-            }
-          }
-        });
+        else {
+          $(this).children().removeClass("bi-arrows-angle-expand");
+          $(this).children().addClass("bi-arrows-angle-contract");
+        }
       });
+    });
+    $("#less").click(function () {
+      if (stationNum <= 2) {
+        alert("No station added");
+        return;
+      }
+      stationNum--;
+      $(".newstation").last().remove();
+    });
+    $(".stationtoggle").click(function () {
+      $(this).next().toggle("slow");
+      var s = $(this).next().find(".station").val();
+      $(this).next().next().text(s);
+      $(this).next().next().toggle("slow");
+      if ($(this).children().hasClass("bi-arrows-angle-contract")) {
+        $(this).children().removeClass("bi-arrows-angle-contract");
+        $(this).children().addClass("bi-arrows-angle-expand");
+      }
+      else {
+        $(this).children().removeClass("bi-arrows-angle-expand");
+        $(this).children().addClass("bi-arrows-angle-contract");
+      }
+    });
+    $("#submit").click(function () {
+
+      let stations = new Array();
+      let price = new Array();
+      let new_trav_time = new Array();
+      let new_stop_time = new Array();
+
+      $(".newStation").each(function () {
+        stations.push($(this).find(".station").val());
+        price.push($(this).find(".price").val());
+        new_trav_time.push($(this).find(".trav_time").val());
+        if ($(this).find(".stop_time").val()) {
+          new_stop_time.push($(this).find(".stop_time").val());
+        }
+      });
+
+      $(".lastStation").each(function () {
+        stations.push($(this).find(".station").val());
+      });
+
+      let joinedStations = stations.join("|");
+      let joinedPrice = price.join("|");
+      let joinedNew_trav_time = new_trav_time.join("|");
+      var joinedNew_stop_time;
+      if (stationNum <= 2) 
+        joinedNew_stop_time = "_";
+      else
+        joinedNew_stop_time = new_stop_time.join("|");
+
+      let sendData = {
+        "newID": $("#newID").val(),
+        "newstationNum": stationNum,
+        "newseatNum": $("#newseatNum").val(),
+        "newType": $("#newType").val(),
+        "stations": joinedStations,
+        "price": joinedPrice,
+        "new_st_time": $("#new_st_time").val(),
+        "new_trav_time": joinedNew_trav_time,
+        "new_stop_time": joinedNew_stop_time,
+        "newsaleDate": $("#newsaleDate").val()
+      }
+      $.ajax({
+        url: "/add_train",
+        type: "post",
+        data: sendData,
+
+        success: function (returnData) {
+          let data = JSON.parse(returnData)
+          if (data["status"] == "0") {
+            alert("Add train success");
+          }
+          else {
+            alert("Add train fail");
+          }
+        }
+      });
+    });
   </script>
 
 </body>
