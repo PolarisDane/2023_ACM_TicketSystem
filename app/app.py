@@ -241,7 +241,7 @@ def add_train():
       newType = request.form.get("newType")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
       message = "[{}] add_train -i {} -n {} -m {} -s {} -p {} -x {} -t {} -o {} -d {} -y {}".format(Timetag, newID, newstationNum, newseatNum, stations, price, new_st_time, new_trav_time, new_stop_time, newsaleDate, newType)
-      print(message)
+      #print(message)
       reslist = inter.fetch(message)
       res = reslist[0].split(" ")
       if res[1] == "-1":
@@ -249,6 +249,57 @@ def add_train():
       else:
         return json.dumps({"status": "0"})
 
+@app.route("/delete_train", methods = ["GET", "POST"])
+def delete_train():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p < 9:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("delete_train.html", now_usr = now_usr)
+    if request.method == "POST":
+      trainID = request.form.get("trainID")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] delete_train -i {}".format(Timetag, trainID)
+      #print(message)
+      reslist = inter.fetch(message)
+      #print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        return json.dumps({"status": "0"})
+
+@app.route("/release_train", methods = ["GET", "POST"])
+def release_train():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p < 9:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("release_train.html", now_usr = now_usr)
+    if request.method == "POST":
+      trainID = request.form.get("trainID")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] release_train -i {}".format(Timetag, trainID)
+      #print(message)
+      reslist = inter.fetch(message)
+      #print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        return json.dumps({"status": "0"})
 
 
 if __name__ == "__main__":
