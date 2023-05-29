@@ -241,7 +241,7 @@ def add_train():
       newType = request.form.get("newType")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
       message = "[{}] add_train -i {} -n {} -m {} -s {} -p {} -x {} -t {} -o {} -d {} -y {}".format(Timetag, newID, newstationNum, newseatNum, stations, price, new_st_time, new_trav_time, new_stop_time, newsaleDate, newType)
-      #print(message)
+      print(message)
       reslist = inter.fetch(message)
       res = reslist[0].split(" ")
       if res[1] == "-1":
@@ -301,6 +301,61 @@ def release_train():
       else:
         return json.dumps({"status": "0"})
 
+@app.route("/query_train", methods = ["GET", "POST"])
+def query_train():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_train.html", now_usr = now_usr)
+    if request.method == "POST":
+      trainID = request.form.get("trainID")
+      Date = request.form.get("Date")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] query_train -i {} -d {}".format(Timetag, trainID, Date)
+      #print(message)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        #return json.dumps({"status": "0", "data": reslist})
+        Type = res[2]
+        stations = []
+        reslen = len(reslist)
+        for i in range(1, reslen - 1):
+          res = reslist[i].split(" ")
+          station = {"name": res[0], "arrive": res[1] + " " + res[2], "leave": res[4] + " " + res[5], "price": res[6], "seat": res[7]}
+          print(station)
+          stations.append(station)
+        return json.dumps({"status": "0", "trainID": trainID, "type": Type, "stations": stations})
+
+@app.route("/query_ticket", methods = ["GET", "POST"])
+def query_ticket():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_ticket.html", now_usr = now_usr)
+    if request.method == "POST":
+      trainID = request.form.get("trainID")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] release_train -i {}".format(Timetag, trainID)
+      #print(message)
+      reslist = inter.fetch(message)
+      #print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        return json.dumps({"status": "0"})
 
 if __name__ == "__main__":
   #添加超级管理员操作未完成
