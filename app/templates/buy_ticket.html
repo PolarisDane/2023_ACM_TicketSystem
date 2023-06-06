@@ -1,6 +1,6 @@
 <html lang="zh-CN">
 <head>
-  <title>单程车票查询</title>
+  <title>购票</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
@@ -28,7 +28,7 @@
       bottom: 0px;
     }
 
-    #train {
+    #profile {
       display: none;
     }
   </style>
@@ -65,11 +65,6 @@
           </ul>
         </div>
       </nav>
-    </div>
-  </div>
-  <div class="container-fluid">
-    <div class="row">
-      <div style="width:300px;"></div>
       <div>
         <br />
         <br />
@@ -78,9 +73,15 @@
         <br />
         <br />
         <br />
-        <div class="card bg-light mb-3" style="width: 480px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
+        <div class="card bg-light mb-3" style="max-width: 540px;">
+          <div class="h3 text-center card-header">购票</div>
           <div class="card-body">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">请输入要购票的列车名</span>
+              </div>
+              <input type="text" class="form-control" id="trainID" aria-label="trainID" aria-describedby="basic-addon1">
+            </div>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text" id="basic-addon1">出发地</span>
@@ -93,54 +94,29 @@
               </div>
               <input type="text" class="form-control" id="ed_sta" aria-label="ed_sta" aria-describedby="basic-addon1">
             </div>
-            <label for="inputDate">出发日期(请以"月份-日期"格式输入)</label>
-            <input type="text" class="form-control" id="Date">
-            <br />
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">出发日期</span>
+              </div>
+              <input type="text" class="form-control" id="Date" aria-label="Date" aria-describedby="basic-addon1" placeholder='(请以月份-日期"格式输入)'>
+            </div>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">购票数量</span>
+              </div>
+              <input type="text" class="form-control" id="ticketNum" aria-label="ticketNum" aria-describedby="basic-addon1">
+            </div>
             <select class="custom-select" id="opt">
-              <option value="time" selected>按照路程时间排序</option>
-              <option value="cost">按照车票价格排序</option>
+              <option value="false" selected>不接受候补票</option>
+              <option value="true">接受候补票</option>
             </select>
-            <button class="btn btn-primary mt-2" id="submit">查询</button>
+            <button class="btn btn-primary mt-2" id="submit">购票</button>
             <br />
           </div>
         </div>
       </div>
-      <div class="col-1">
-      </div>
-      <div>
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <div id="train" class="card bg-light mb-3" style="width: 900px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-2">
-                <div>列车名</div>
-              </div>
-              <div class="col-2">
-                <div>出发时间</div>
-              </div>
-              <div class="col-2">
-                <div>到达时间</div>
-              </div>
-              <div class="col-3">
-                <div>车票价格</div>
-              </div>
-              <div class="col-3">
-                <div>剩余车票数</div>
-              </div>
-            </div>
-            <br />
-            <div class="profile">
+      <div class="col-2">
 
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -155,65 +131,28 @@
     $("#submit").click(function () {
 
       let sendData = {
+        "trainID": $("#trainID").val(),
         "st_sta": $("#st_sta").val(),
         "ed_sta": $("#ed_sta").val(),
         "Date": $("#Date").val(),
+        "ticketNum": $("#ticketNum").val(),
         "opt": $("#opt").val()
       }
       $.ajax({
-        url: "/query_ticket",
+        url: "/buy_ticket",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
           if (data["status"] == "0") {
-            if (data["tickets"].length == 0) {
-              $("#train .ticket").empty();
-              $("#train").hide("slow");
-              alert("No ticket found");
-              return;
-            }
-            $("#train .profile").empty();
-            for (tic in data["tickets"]) {
-              let addHTML = `
-                  <div class="ticket row">
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="name"></div>
-                    </div>
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="leave"></div>
-                    </div>
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="arrive"></div>
-                    </div>
-                    <div class="col-3">
-                      <span> </span>
-                      <div class="price"></div>
-                    </div>
-                    <div class="col-3">
-                      <span> </span>
-                      <div class="seat"></div>
-                    </div>
-                  </div>
-                  <br />
-                `
-              $("#train .profile").append(addHTML);
-              $("#train .ticket .name:last").text(data["tickets"][tic]["name"]);
-              $("#train .ticket .arrive:last").text(data["tickets"][tic]["arrive"]);
-              $("#train .ticket .leave:last").text(data["tickets"][tic]["leave"]);
-              $("#train .ticket .price:last").text(data["tickets"][tic]["price"]);
-              $("#train .ticket .seat:last").text(data["tickets"][tic]["seat"]);
-            }
-            $("#train").show("slow");
+            alert("Buy ticket success");
+          }
+          else if (data["status"] == "1") {
+            alert("Your order has been put in queue");
           }
           else {
-            alert("Query ticket fail");
-            $("#train .ticket").empty();
-            $("#train").hide("slow");
+            alert("Buy ticket fail");
           }
         }
       });

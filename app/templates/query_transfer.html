@@ -1,6 +1,6 @@
 <html lang="zh-CN">
 <head>
-  <title>单程车票查询</title>
+  <title>单转车票查询</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
@@ -79,7 +79,7 @@
         <br />
         <br />
         <div class="card bg-light mb-3" style="width: 480px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
+          <div class="h3 text-center card-header">查询单转车票信息(这里只为您显示最佳方案)</div>
           <div class="card-body">
             <div class="input-group mb-3">
               <div class="input-group-prepend">
@@ -116,8 +116,11 @@
         <br />
         <br />
         <div id="train" class="card bg-light mb-3" style="width: 900px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
+          <div class="h3 text-center card-header">查询单转车票信息</div>
           <div class="card-body">
+            <span>中转站:</span>
+            <span class="h5 inter_sta"></span>
+            <br />
             <div class="row">
               <div class="col-2">
                 <div>列车名</div>
@@ -161,19 +164,14 @@
         "opt": $("#opt").val()
       }
       $.ajax({
-        url: "/query_ticket",
+        url: "/query_transfer",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
+          $(".inter_sta").text(data["inter_sta"]);
           if (data["status"] == "0") {
-            if (data["tickets"].length == 0) {
-              $("#train .ticket").empty();
-              $("#train").hide("slow");
-              alert("No ticket found");
-              return;
-            }
             $("#train .profile").empty();
             for (tic in data["tickets"]) {
               let addHTML = `
@@ -210,8 +208,13 @@
             }
             $("#train").show("slow");
           }
+          else if (data["status"] == "1") {
+            alert("No transfer ticket found");
+            $("#train .ticket").empty();
+            $("#train").hide("slow");
+          }
           else {
-            alert("Query ticket fail");
+            alert("Query tranfer fail");
             $("#train .ticket").empty();
             $("#train").hide("slow");
           }

@@ -1,5 +1,4 @@
 #具体报错信息未添加
-
 from flask import Flask, render_template, request, flash, url_for, redirect
 from transitioner import transition
 import time
@@ -19,6 +18,9 @@ def home():
   global now_usr
   global now_p
   msg = request.args.get("msg")
+  Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+  message = "[{}] add_user -c Polaris_Dane -u Polaris_Dane -p 5y57576 -n 陈一星 -m 2488721971@qq.com -g 10".format(Timetag)
+  reslist = inter.fetch(message)
   return render_template("home.html", now_usr = now_usr, msg = msg)
   
 @app.route("/login", methods = ["GET", "POST"])
@@ -33,7 +35,7 @@ def login():
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] login -u {} -p {}".format(Timetag, UserName, UserPassword)
     reslist = inter.fetch(message)
-    #print(reslist)
+    print(reslist)
     res = reslist[0].split(" ")
     Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
     message = "[{}] query_profile -c {} -u {}".format(Timetag, UserName, UserName)
@@ -318,7 +320,7 @@ def query_train():
       message = "[{}] query_train -i {} -d {}".format(Timetag, trainID, Date)
       #print(message)
       reslist = inter.fetch(message)
-      print(reslist)
+      #print(reslist)
       res = reslist[0].split(" ")
       if res[1] == "-1":
         return json.dumps({"status": "-1"})
@@ -330,7 +332,7 @@ def query_train():
         for i in range(1, reslen - 1):
           res = reslist[i].split(" ")
           station = {"name": res[0], "arrive": res[1] + " " + res[2], "leave": res[4] + " " + res[5], "price": res[6], "seat": res[7]}
-          print(station)
+          #print(station)
           stations.append(station)
         return json.dumps({"status": "0", "trainID": trainID, "type": Type, "stations": stations})
 
@@ -345,18 +347,95 @@ def query_ticket():
     if request.method == "GET":
       return render_template("query_ticket.html", now_usr = now_usr)
     if request.method == "POST":
-      trainID = request.form.get("trainID")
+      st_sta = request.form.get("st_sta")
+      ed_sta = request.form.get("ed_sta")
+      Date = request.form.get("Date")
+      opt = request.form.get("opt")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
-      message = "[{}] release_train -i {}".format(Timetag, trainID)
+      message = "[{}] query_ticket -s {} -t {} -d {} -p {}".format(Timetag, st_sta, ed_sta, Date, opt)
+      print(message)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        tickets = []
+        reslen = len(reslist)
+        for i in range(1, reslen - 1):
+          res = reslist[i].split(" ")
+          ticket = {"name": res[0], "leave": res[2] + " " + res[3], "arrive": res[6] + " " + res[7], "price": res[8], "seat": res[9]}
+          tickets.append(ticket)
+        return json.dumps({"status": "0", "tickets": tickets})
+
+@app.route("/query_transfer", methods = ["GET", "POST"])
+def query_transfer():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_transfer.html", now_usr = now_usr)
+    if request.method == "POST":
+      st_sta = request.form.get("st_sta")
+      ed_sta = request.form.get("ed_sta")
+      Date = request.form.get("Date")
+      opt = request.form.get("opt")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] query_transfer -s {} -t {} -d {} -p {}".format(Timetag, st_sta, ed_sta, Date, opt)
       #print(message)
       reslist = inter.fetch(message)
       #print(reslist)
       res = reslist[0].split(" ")
       if res[1] == "-1":
         return json.dumps({"status": "-1"})
+      elif res[1] == "0":
+        return json.dumps({"status": "1"})
+      else:
+        tickets = []
+        res = reslist[0].split(" ")
+        ticket1 = {"name": res[1], "leave": res[3] + " " + res[4], "arrive": res[7] + " " + res[8], "price": res[9], "seat": res[10]}
+        tickets.append(ticket1)
+        inter_sta = res[6]
+        res = reslist[1].split(" ")
+        ticket2 = {"name": res[0], "leave": res[2] + " " + res[3], "arrive": res[6] + " " + res[7], "price": res[8], "seat": res[9]}
+        tickets.append(ticket2)
+        return json.dumps({"status": "0", "tickets": tickets, "inter_sta": inter_sta})
+
+@app.route("/buy_ticket", methods = ["GET", "POST"])
+def buy_ticket():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("buy_ticket.html", now_usr = now_usr)
+    if request.method == "POST":
+      trainID = request.form.get("trainID")
+      ticketNum = request.form.get("ticketNum")
+      st_sta = request.form.get("st_sta")
+      ed_sta = request.form.get("ed_sta")
+      Date = request.form.get("Date")
+      opt = request.form.get("opt")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] buy_ticket -u {} -i {} -n {} -f {} -t {} -d {} -q {}".format(Timetag, now_usr, trainID, ticketNum, st_sta, ed_sta, Date, opt)
+      print(message)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      elif res[1] == "queue":
+        return json.dumps({"status": "1"})
       else:
         return json.dumps({"status": "0"})
 
 if __name__ == "__main__":
-  #添加超级管理员操作未完成
+  #Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+  #message = "[{}] add_user -c Polaris_Dane -u Polaris_Dane -p 5y57576 -n 陈一星 -m 2488721971@qq.com -g 10".format(Timetag)
+  #reslist = inter.fetch(message)
   app.run()
