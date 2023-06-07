@@ -1,6 +1,6 @@
 <html lang="zh-CN">
 <head>
-  <title>单程车票查询</title>
+  <title>查询车票记录</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
@@ -69,7 +69,7 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <div style="width:300px;"></div>
+      <div style="width:240px;"></div>
       <div>
         <br />
         <br />
@@ -78,61 +78,33 @@
         <br />
         <br />
         <br />
-        <div class="card bg-light mb-3" style="width: 480px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
-          <div class="card-body">
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">出发地</span>
-              </div>
-              <input type="text" class="form-control" id="st_sta" aria-label="st_sta" aria-describedby="basic-addon1">
-            </div>
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">到达地</span>
-              </div>
-              <input type="text" class="form-control" id="ed_sta" aria-label="ed_sta" aria-describedby="basic-addon1">
-            </div>
-            <label for="inputDate">出发日期(请以"月份-日期"格式输入)</label>
-            <input type="text" class="form-control" id="Date">
-            <br />
-            <select class="custom-select" id="opt">
-              <option value="time" selected>按照路程时间排序</option>
-              <option value="cost">按照车票价格排序</option>
-            </select>
-            <button class="btn btn-primary mt-2" id="submit">查询</button>
-            <br />
-          </div>
-        </div>
-      </div>
-      <div class="col-1">
-      </div>
-      <div>
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <div id="train" class="card bg-light mb-3" style="width: 900px;">
-          <div class="h3 text-center card-header">查询单程车票信息</div>
+        <div id="train" class="card bg-light mb-3" style="width: 1440px;">
+          <div class="h3 text-center card-header">查询车票记录(按照交易时间排序)</div>
           <div class="card-body">
             <div class="row">
               <div class="col-2">
+                <div>状态</div>
+              </div>
+              <div class="col-2">
                 <div>列车名</div>
+              </div>
+              <div class="col-1">
+                <div>出发地</div>
               </div>
               <div class="col-2">
                 <div>出发时间</div>
               </div>
+              <div class="col-1">
+                <div>到达地</div>
+              </div>
               <div class="col-2">
                 <div>到达时间</div>
               </div>
-              <div class="col-3">
-                <div>车票价格</div>
+              <div class="col-1">
+                <div>车票单价</div>
               </div>
-              <div class="col-3">
-                <div>剩余车票数</div>
+              <div class="col-1">
+                <div>购票数量</div>
               </div>
             </div>
             <br />
@@ -152,66 +124,69 @@
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
   <script>
-    $("#submit").click(function () {
-
-      let sendData = {
-        "st_sta": $("#st_sta").val(),
-        "ed_sta": $("#ed_sta").val(),
-        "Date": $("#Date").val(),
-        "opt": $("#opt").val()
-      }
+    $(function () {
+      let sendData = {}
       $.ajax({
-        url: "/query_ticket",
+        url: "/query_order",
         type: "post",
         data: sendData,
 
         success: function (returnData) {
           let data = JSON.parse(returnData)
           if (data["status"] == "0") {
-            if (data["tickets"].length == 0) {
-              $("#train .ticket").empty();
-              $("#train").hide("slow");
-              alert("No ticket found");
-              return;
-            }
             $("#train .profile").empty();
             for (tic in data["tickets"]) {
               let addHTML = `
                   <div class="ticket row">
                     <div class="col-2">
                       <span> </span>
+                      <div class="status"></div>
+                    </div>
+                    <div class="col-2">
+                      <span> </span>
                       <div class="name"></div>
+                    </div>
+                    <div class="col-1">
+                      <span> </span>
+                      <div class="st_sta"></div>
                     </div>
                     <div class="col-2">
                       <span> </span>
                       <div class="leave"></div>
                     </div>
+                    <div class="col-1">
+                      <span> </span>
+                      <div class="ed_sta"></div>
+                    </div>
                     <div class="col-2">
                       <span> </span>
                       <div class="arrive"></div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-1">
                       <span> </span>
                       <div class="price"></div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-1">
                       <span> </span>
-                      <div class="seat"></div>
+                      <div class="ticketNum"></div>
                     </div>
                   </div>
                   <br />
                 `
               $("#train .profile").append(addHTML);
+              $("#train .ticket .status:last").text(data["tickets"][tic]["status"]);
               $("#train .ticket .name:last").text(data["tickets"][tic]["name"]);
-              $("#train .ticket .arrive:last").text(data["tickets"][tic]["arrive"]);
+              $("#train .ticket .st_sta:last").text(data["tickets"][tic]["st_sta"]);
               $("#train .ticket .leave:last").text(data["tickets"][tic]["leave"]);
+              $("#train .ticket .ed_sta:last").text(data["tickets"][tic]["ed_sta"]);
+              $("#train .ticket .arrive:last").text(data["tickets"][tic]["arrive"]);
               $("#train .ticket .price:last").text(data["tickets"][tic]["price"]);
-              $("#train .ticket .seat:last").text(data["tickets"][tic]["seat"]);
+              $("#train .ticket .ticketNum:last").text(data["tickets"][tic]["ticketNum"]);
             }
             $("#train").show("slow");
           }
           else {
-            alert("Query ticket fail");
+            alert("Query order fail");
             $("#train .profile").empty();
             $("#train").hide("slow");
           }

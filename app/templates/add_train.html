@@ -193,6 +193,8 @@
         return;
       }
       stationNum--;
+      $(".newstation").last().prev().remove();
+      $(".newstation").last().next().remove();
       $(".newstation").last().remove();
     });
     $(".stationtoggle").click(function () {

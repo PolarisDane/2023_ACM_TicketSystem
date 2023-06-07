@@ -434,6 +434,57 @@ def buy_ticket():
       else:
         return json.dumps({"status": "0"})
 
+@app.route("/query_order", methods = ["GET", "POST"])
+def query_order():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("query_order.html", now_usr = now_usr)
+    if request.method == "POST":
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] query_order -u {}".format(Timetag, now_usr)
+      print(message)
+      reslist = inter.fetch(message)
+      print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        tickets = []
+        reslen = len(reslist)
+        for i in range(1, reslen - 1):
+          res = reslist[i].split(" ")
+          ticket = {"status": res[0], "name": res[1], "st_sta": res[2], "leave": res[3] + " " + res[4], "ed_sta": res[6], "arrive": res[7] + " " + res[8], "price": res[9], "ticketNum": res[10]}
+          tickets.append(ticket)
+        return json.dumps({"status": "0", "tickets": tickets})
+
+@app.route("/refund_ticket", methods = ["GET", "POST"])
+def refund_ticket():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("refund_ticket.html", now_usr = now_usr)
+    if request.method == "POST":
+      pos = request.form.get("pos")
+      Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+      message = "[{}] refund_ticket -u {} -n {}".format(Timetag, now_usr, pos)
+      #print(message)
+      reslist = inter.fetch(message)
+      #print(reslist)
+      res = reslist[0].split(" ")
+      if res[1] == "-1":
+        return json.dumps({"status": "-1"})
+      else:
+        return json.dumps({"status": "0"})
+
 if __name__ == "__main__":
   #Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
   #message = "[{}] add_user -c Polaris_Dane -u Polaris_Dane -p 5y57576 -n 陈一星 -m 2488721971@qq.com -g 10".format(Timetag)
