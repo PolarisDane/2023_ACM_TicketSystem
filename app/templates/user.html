@@ -103,15 +103,13 @@
               <div class="dropdown-menu">
                 {% if now_p >=9 %}
                 <a href="/add_train" class="dropdown-item">车次信息发布</a>
-                <a href="/delete_train" class="dropdown-item">车次删除</a>
-                <a href="/release_train" class="dropdown-item">车票发售</a>
+                <a href="/train" class="dropdown-item">车次管理</a>
                 <a href="/query_train" class="dropdown-item">车次查询</a>
                 <a href="/query_ticket" class="dropdown-item">单程车票查询</a>
                 <a href="/query_transfer" class="dropdown-item">单转车票查询</a>
                 {% else %}
                 <a href="/add_train" class="dropdown-item disabled">车次信息发布(用户权限不足)</a>
-                <a href="/delete_train" class="dropdown-item disabled">车次删除(用户权限不足)</a>
-                <a href="/release_train" class="dropdown-item disabled">车票发售(用户权限不足)</a>
+                <a href="/train" class="dropdown-item disabled">车次管理(用户权限不足)</a>
                 <a href="/query_train" class="dropdown-item">车次查询</a>
                 <a href="/query_ticket" class="dropdown-item">单程车票查询</a>
                 <a href="/query_transfer" class="dropdown-item">单转车票查询</a>
@@ -130,8 +128,7 @@
               </button>
               <div class="dropdown-menu">
                 <a href="/buy_ticket" class="dropdown-item">购票</a>
-                <a href="/query_order" class="dropdown-item">查询车票记录</a>
-                <a href="/refund_ticket" class="dropdown-item">退票</a>
+                <a href="/ticket" class="dropdown-item">车票管理</a>
               </div>
             </div>
             <div class="card-body">

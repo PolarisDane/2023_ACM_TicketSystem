@@ -82,7 +82,7 @@
           <div class="h3 text-center card-header">查询车票记录(按照交易时间排序)</div>
           <div class="card-body">
             <div class="row">
-              <div class="col-2">
+              <div class="col-1">
                 <div>状态</div>
               </div>
               <div class="col-2">
@@ -108,6 +108,7 @@
               </div>
             </div>
             <br />
+            
             <div class="profile">
 
             </div>
@@ -137,43 +138,48 @@
             $("#train .profile").empty();
             for (tic in data["tickets"]) {
               let addHTML = `
-                  <div class="ticket row">
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="status"></div>
+                    <div class="ticket row">
+                      <div class="pos" style="display:none;">
+
+                      </div>
+                      <div class="col-1">
+                        <span> </span>
+                        <div class="status"></div>
+                      </div>
+                      <div class="col-2">
+                        <span> </span>
+                        <div class="name"></div>
+                      </div>
+                      <div class="col-1">
+                        <span> </span>
+                        <div class="st_sta"></div>
+                      </div>
+                      <div class="col-2">
+                        <span> </span>
+                        <div class="leave"></div>
+                      </div>
+                      <div class="col-1">
+                        <span> </span>
+                        <div class="ed_sta"></div>
+                      </div>
+                      <div class="col-2">
+                        <span> </span>
+                        <div class="arrive"></div>
+                      </div>
+                      <div class="col-1">
+                        <span> </span>
+                        <div class="price"></div>
+                      </div>
+                      <div class="col-1">
+                        <span> </span>
+                        <div class="ticketNum"></div>
+                      </div>
+                      <button class="btn btn-primary refund">退票</button>
                     </div>
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="name"></div>
-                    </div>
-                    <div class="col-1">
-                      <span> </span>
-                      <div class="st_sta"></div>
-                    </div>
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="leave"></div>
-                    </div>
-                    <div class="col-1">
-                      <span> </span>
-                      <div class="ed_sta"></div>
-                    </div>
-                    <div class="col-2">
-                      <span> </span>
-                      <div class="arrive"></div>
-                    </div>
-                    <div class="col-1">
-                      <span> </span>
-                      <div class="price"></div>
-                    </div>
-                    <div class="col-1">
-                      <span> </span>
-                      <div class="ticketNum"></div>
-                    </div>
-                  </div>
-                  <br />
-                `
+                    <br />
+                  `
               $("#train .profile").append(addHTML);
+              $("#train .ticket .pos:last").text(parseInt(tic) + 1);
               $("#train .ticket .status:last").text(data["tickets"][tic]["status"]);
               $("#train .ticket .name:last").text(data["tickets"][tic]["name"]);
               $("#train .ticket .st_sta:last").text(data["tickets"][tic]["st_sta"]);
@@ -182,6 +188,28 @@
               $("#train .ticket .arrive:last").text(data["tickets"][tic]["arrive"]);
               $("#train .ticket .price:last").text(data["tickets"][tic]["price"]);
               $("#train .ticket .ticketNum:last").text(data["tickets"][tic]["ticketNum"]);
+              $("#train .ticket .refund:last").click(function () {
+                let sendData = {
+                  "pos": $(this).parent().find(".pos").text()
+                }
+                target = $(this).parent().find(".status");
+                $.ajax({
+                  url: "/refund_ticket",
+                  type: "post",
+                  data: sendData,
+
+                  success: function (returnData) {
+                    let data = JSON.parse(returnData)
+                    if (data["status"] == "0") {
+                      target.text("[refunded]");
+                      alert("Refund ticket success");
+                    }
+                    else {
+                      alert("Refund ticket fail");
+                    }
+                  }
+                });
+              });
             }
             $("#train").show("slow");
           }

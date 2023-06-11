@@ -251,6 +251,20 @@ def add_train():
       else:
         return json.dumps({"status": "0"})
 
+@app.route("/train", methods = ["GET", "POST"])
+def train():
+  global now_usr
+  global now_p
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  elif now_p < 9:
+    msg = "Authority not enough"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("train.html", now_usr = now_usr)
+
 @app.route("/delete_train", methods = ["GET", "POST"])
 def delete_train():
   global now_usr
@@ -262,8 +276,6 @@ def delete_train():
     msg = "Authority not enough"
     return redirect(url_for("home", msg = msg))
   else:
-    if request.method == "GET":
-      return render_template("delete_train.html", now_usr = now_usr)
     if request.method == "POST":
       trainID = request.form.get("trainID")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
@@ -288,8 +300,6 @@ def release_train():
     msg = "Authority not enough"
     return redirect(url_for("home", msg = msg))
   else:
-    if request.method == "GET":
-      return render_template("release_train.html", now_usr = now_usr)
     if request.method == "POST":
       trainID = request.form.get("trainID")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
@@ -404,6 +414,15 @@ def query_transfer():
         tickets.append(ticket2)
         return json.dumps({"status": "0", "tickets": tickets, "inter_sta": inter_sta})
 
+@app.route("/ticket", methods = ["GET", "POST"])
+def ticket():
+  if now_usr == "":
+    msg = "Not logined"
+    return redirect(url_for("home", msg = msg))
+  else:
+    if request.method == "GET":
+      return render_template("ticket.html", now_usr = now_usr)
+
 @app.route("/buy_ticket", methods = ["GET", "POST"])
 def buy_ticket():
   global now_usr
@@ -412,8 +431,6 @@ def buy_ticket():
     msg = "Not logined"
     return redirect(url_for("home", msg = msg))
   else:
-    if request.method == "GET":
-      return render_template("buy_ticket.html", now_usr = now_usr)
     if request.method == "POST":
       trainID = request.form.get("trainID")
       ticketNum = request.form.get("ticketNum")
@@ -442,8 +459,6 @@ def query_order():
     msg = "Not logined"
     return redirect(url_for("home", msg = msg))
   else:
-    if request.method == "GET":
-      return render_template("query_order.html", now_usr = now_usr)
     if request.method == "POST":
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
       message = "[{}] query_order -u {}".format(Timetag, now_usr)
@@ -470,15 +485,13 @@ def refund_ticket():
     msg = "Not logined"
     return redirect(url_for("home", msg = msg))
   else:
-    if request.method == "GET":
-      return render_template("refund_ticket.html", now_usr = now_usr)
     if request.method == "POST":
       pos = request.form.get("pos")
       Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
       message = "[{}] refund_ticket -u {} -n {}".format(Timetag, now_usr, pos)
-      #print(message)
+      print(message)
       reslist = inter.fetch(message)
-      #print(reslist)
+      print(reslist)
       res = reslist[0].split(" ")
       if res[1] == "-1":
         return json.dumps({"status": "-1"})
