@@ -128,10 +128,10 @@
               <div class="col-2">
                 <div>到达时间</div>
               </div>
-              <div class="col-3">
+              <div class="col-2">
                 <div>车票价格</div>
               </div>
-              <div class="col-3">
+              <div class="col-2">
                 <div>剩余车票数</div>
               </div>
             </div>
@@ -190,11 +190,11 @@
                       <span> </span>
                       <div class="arrive"></div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-2">
                       <span> </span>
                       <div class="price"></div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-2">
                       <span> </span>
                       <div class="seat"></div>
                     </div>
@@ -207,6 +207,8 @@
               $("#train .ticket .leave:last").text(data["tickets"][tic]["leave"]);
               $("#train .ticket .price:last").text(data["tickets"][tic]["price"]);
               $("#train .ticket .seat:last").text(data["tickets"][tic]["seat"]);
+              $("#train .ticket .buy:last").click(function () {
+              });
             }
             $("#train").show("slow");
           }

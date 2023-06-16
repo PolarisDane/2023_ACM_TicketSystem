@@ -1,0 +1,116 @@
+<html lang="zh-CN">
+<head>
+  <title>车次管理</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <style type="text/css">
+    body {
+      /* 填充背景 */
+      background: url(../static/bg.jpg) no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    div img {
+      /* 填充式图片，填充整个 div */
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0px;
+    }
+
+    #profile {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light col-12">
+        <a class="navbar-brand" href="/">Polaris_Dane's TicketSystem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">主页<span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+          <ul class="navbar-nav my-2 my-lg-0">
+            {% if now_usr %}
+            <li class="nav-item">
+              <a class="nav-link" href="/user">{{now_usr}}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">退出</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/login">登录</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+      <div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <div class="card bg-light mb-3" style="width: 1080px;">
+          <div class="h3 text-center card-header">用户使用手册</div>
+          <div class="card-body">
+            <span>本网站为火车票管理系统的前端，实现了对应功能的图形化操作界面，方便用户使用操作。</span>
+            <br />
+            <span>网站有初始超级管理员，其他管理员用户也可以在页面中进行添加。</span>
+            <br />
+            <span>本网站采用响应式设计，页面可以根据缩放自行调整结构适应；同时也采用了异步请求，使网页只更新需要更新的部分；所有网页都有图形化或文字指示方便使用。</span>
+            <br />
+            <span>本网站后续还会更新，尽量做一个功能齐全便于使用的网站。</span>
+            <br />
+            <br />
+            <span class="h3">具体页面与功能</span>
+            <br />
+            <span>在主页可以访问用户使用手册，也可以进行登录。</span>
+            <br />
+            <span>登录之后进入用户界面，可以访问三个子系统，即用户系统，火车系统和车票系统，每个系统执行相关功能。</span>
+            <br />
+            <span>用户系统支持用户信息查询，用户信息修改以及添加用户，针对用户和管理员提供了不同的界面。</span>
+            <br />
+            <span>火车系统支持车次信息发布，车次管理，车次查询，单程单转车票查询，将删除和发售功能已整合(车票查询与购票合并未完成)。</span>
+            <br />
+            <span>车票系统支持购票，查询记录，退票，查询记录和退票功能已整合。</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+
+      </div>
+    </div>
+
+
+
+  </div>
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

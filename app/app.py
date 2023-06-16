@@ -1,5 +1,5 @@
 #具体报错信息未添加
-from flask import Flask, render_template, request, flash, url_for, redirect
+from flask import Flask, render_template, request, flash, url_for, redirect, session
 from transitioner import transition
 import time
 import json
@@ -22,6 +22,12 @@ def home():
   message = "[{}] add_user -c Polaris_Dane -u Polaris_Dane -p 5y57576 -n 陈一星 -m 2488721971@qq.com -g 10".format(Timetag)
   reslist = inter.fetch(message)
   return render_template("home.html", now_usr = now_usr, msg = msg)
+
+@app.route("/guide", methods = ["GET", "POST"])
+def guide():
+  global now_usr
+  global now_p
+  return render_template("guide.html", now_usr = now_usr)
   
 @app.route("/login", methods = ["GET", "POST"])
 def login():
@@ -42,12 +48,17 @@ def login():
     reslist = inter.fetch(message)
     pri = reslist[0].split(" ")
     if res[1] == "0":
+      if now_usr:
+        Timetag = time.strftime("%Y-%m-%d;%H:%M:%S", time.localtime(time.time()))
+        message = "[{}] logout -u {}".format(Timetag, now_usr)
+        reslist = inter.fetch(message)
       now_usr = UserName
       now_p = int(pri[4])
       #print(now_p)
       return json.dumps({"status": "0", "username": UserName})
     else:
       return json.dumps({"status": "-1", "username": ""})#还未传报错信息
+
 @app.route("/add_user", methods=["GET", "POST"])
 def add_user():
   #密码确认保密未进行
@@ -431,6 +442,8 @@ def buy_ticket():
     msg = "Not logined"
     return redirect(url_for("home", msg = msg))
   else:
+    if request.method == "GET":
+      return render_template("buy_ticket.html", now_usr = now_usr)
     if request.method == "POST":
       trainID = request.form.get("trainID")
       ticketNum = request.form.get("ticketNum")
